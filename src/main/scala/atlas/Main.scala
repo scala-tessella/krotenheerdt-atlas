@@ -1,19 +1,22 @@
 package atlas
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.scalajs.js
 
 import com.raquo.laminar.api.L.*
 import org.scalajs.dom
 
+import Catalog.*
 import Model.*
 
-/** The atlas application: the sequence, the table of classes and a page per class, driven by the URL
-  * fragment. The shell of the port: the class page lists what the patch holds; the viewer comes next.
+/** The atlas application: the sequence, the table of classes and a page per class, driven by the URL fragment
+  * ([[Route]]).
   */
 object Main:
 
   val route: Var[Route] = Var(Route.parse(dom.window.location.hash))
+
+  /** The table's filter and sort, kept for the visit, so the table reopens as it was left. */
+  val filter: Var[Filter] = Var(Filter())
 
   def go(r: Route): Unit = dom.window.location.hash = Route.fragment(r)
 
@@ -27,67 +30,230 @@ object Main:
       headerTag(
         h1("Krötenheerdt honeycombs of E³"),
         navTag(
-          a(href := Route.fragment(Route.Sequence), "Sequence"),
-          a(href := Route.fragment(Route.Classes), "Classes")
+          a(
+            href := Route.fragment(Route.Sequence),
+            cls("on") <-- route.signal.map(_ == Route.Sequence),
+            "Sequence"
+          ),
+          a(
+            href := Route.fragment(Route.Classes(None)),
+            cls("on") <-- route.signal.map { case Route.Classes(_) => true; case _ => false },
+            "Classes"
+          ),
+          child.maybe <-- route.signal.map {
+            case r: Route.Class => Some(a(href := Route.fragment(r), cls := "on", "Class"))
+            case _              => None
+          }
         ),
-        span(cls := "count", child.text <-- index.map(_.fold("")(i => s"${i.classes.length} classes")))
+        span(cls := "spacer"),
+        span(
+          cls    := "note",
+          child.text <-- index.map(_.fold("")(i =>
+            s"${i.classes.length} classes, k = 1 to ${i.classes.map(_.k).max}"
+          ))
+        )
       ),
       mainTag(
         child <-- index.combineWith(route.signal).map {
           case (None, _)                          => p(cls := "note", "loading the atlas…")
           case (Some(i), Route.Sequence)          => sequenceView(i)
-          case (Some(i), Route.Classes)           => classesView(i)
+          case (Some(i), Route.Classes(k))        =>
+            k.foreach(k => filter.update(_.copy(k = Some(k))))
+            classesView(i)
           case (Some(i), Route.Class(id, orbits)) =>
             i.classes.find(_.id == id).fold(p(cls := "note", s"no class $id"))(classView(i, _, orbits))
         }
       )
     )
 
+  // ---------- the sequence ----------
+
   def sequenceView(i: AtlasIndex): HtmlElement =
-    table(
-      thead(tr(th("k"), th("N", sub("k")), th("status"), th("composition"))),
-      tbody(
-        i.sequence.toSeq.sortBy(_.k).map(r => tr(td(r.k), td(r.n), td(r.status), td(r.note)))
+    val classes = i.classes.toSeq
+    div(
+      cls := "card",
+      h2("The three-dimensional Krötenheerdt sequence"),
+      p(
+        cls := "prose",
+        "N",
+        sub("k"),
+        " counts the face-to-face honeycombs of E³ by unit-edge convex uniform polyhedra with exactly ",
+        "k vertex orbits carrying k pairwise distinct vertex stars. For k ≥ 5 every such honeycomb is a ",
+        "two-direction stacking of cube layers and prism rows, or the prismatic lift of a planar Krötenheerdt ",
+        "tiling; the planar numbers are 11, 20, 39, 33, 15, 10, 7 and then 0. The three-dimensional sequence reads ",
+        "28, 57, 119, 146, 122, 78, 16 and vanishes from k = 8 on, at the same point as the planar one."
+      ),
+      table(
+        cls := "seq",
+        thead(tr(th("k"), th("N", sub("k")), th("status"), th("composition"), th("atlas"))),
+        tbody(
+          i.sequence.toSeq.sortBy(_.k).map { r =>
+            val listed = classes.count(_.k == r.k)
+            tr(
+              td(r.k),
+              td(r.n),
+              td(cls := s"status-${r.status}", r.status),
+              td(r.note),
+              td(
+                if listed == 0 then ""
+                else a(href := Route.fragment(Route.Classes(Some(r.k))), s"$listed in the atlas")
+              )
+            )
+          }
+        )
+      ),
+      p(
+        cls := "note",
+        "theorem: complete and certified; exact: complete under the structure theorems, every class certified."
+      )
+    )
+
+  // ---------- the table ----------
+
+  private def tag(c: ClassEntry): HtmlElement = span(cls := s"tag ${c.cat}", c.cat)
+
+  /** A choice filter: "all" or one of the column's values. */
+  private def choice(
+      title: String,
+      values: Seq[String],
+      get: Filter => Option[String],
+      set: (Filter, Option[String]) => Filter
+  ): HtmlElement =
+    label(
+      title + " ",
+      select(
+        option(value := "", "all"),
+        values.map(v => option(value := v, v)),
+        controlled(
+          value <-- filter.signal.map(get(_).getOrElse("")),
+          onChange.mapToValue --> { v => filter.update(set(_, Option(v).filter(_.nonEmpty))) }
+        )
       )
     )
 
   def classesView(i: AtlasIndex): HtmlElement =
-    table(
-      thead(tr(th("id"), th("name"), th("source"), th("chambers"), th("species"))),
-      tbody(
-        i.classes.toSeq.map(c =>
-          tr(
-            td(a(href := Route.fragment(Route.Class(c.id, orbits = false)), c.id)),
-            td(c.name),
-            td(c.cat),
-            td(chambersOf(c).fold("")(_.toString)),
-            td(cls := "mono", c.pair)
+    val classes = i.classes.toSeq
+    val rows    = filter.signal.map(Catalog.rows(classes, _))
+    div(
+      div(
+        cls := "filters",
+        choice(
+          "k",
+          choices(classes, _.k.toString),
+          _.k.map(_.toString),
+          (f, v) => f.copy(k = v.map(_.toInt))
+        ),
+        choice("world", choices(classes, _.world), _.world, (f, v) => f.copy(world = v)),
+        choice("source", choices(classes, _.cat), _.source, (f, v) => f.copy(source = v)),
+        label(
+          "search ",
+          input(
+            placeholder := "species label, name, word, key",
+            size        := 34,
+            controlled(
+              value <-- filter.signal.map(_.text),
+              onInput.mapToValue --> { t => filter.update(_.copy(text = t)) }
+            )
           )
+        ),
+        span(cls := "note", child.text <-- rows.map(r => s"${r.size} classes"))
+      ),
+      table(
+        thead(
+          tr(
+            Column.values.toSeq.map(col =>
+              th(
+                cls := "sortable",
+                onClick --> { _ => filter.update(_.sortedBy(col)) },
+                child.text <-- filter.signal.map(f =>
+                  col.title + (if f.sort == col then if f.ascending then " ▲" else " ▼" else "")
+                )
+              )
+            )
+          )
+        ),
+        tbody(
+          children <-- rows.map(_.map(c =>
+            tr(
+              cls := "row",
+              onClick --> { _ => go(Route.Class(c.id, orbits = false)) },
+              td(cls := "mono", c.id),
+              td(c.k),
+              td(c.name),
+              td(tag(c)),
+              td(c.world),
+              td(chambersOf(c).fold("")(_.toString)),
+              td(cls := "mono", if c.pair.nonEmpty then c.pair else c.cells.mkString(" "))
+            )
+          ))
         )
       )
     )
 
-  def classView(i: AtlasIndex, c: ClassEntry, orbits: Boolean): HtmlElement =
-    if orbits then Prefs.orbits.set(true) // #class/<id>?orbits turns the orbits on
-    val patch = Signal.fromFuture(Data.patch(c.id))
-    div(
-      cls := "classpage",
-      div(
-        cls := "card",
-        h2(s"${c.id} · ${c.name}"),
-        dl(
-          dt("k"),
-          dd(c.k),
-          dt("source"),
-          dd(c.source),
-          dt("chambers"),
-          dd(chambersOf(c).fold("—")(_.toString)),
-          dt("species"),
-          dd(cls := "mono", if c.pair.isEmpty then "—" else c.pair)
+  // ---------- a class ----------
+
+  private def row(title: String, value: Modifier[HtmlElement]*): Seq[HtmlElement] = Seq(dt(title), dd(value*))
+
+  /** The class's description list: what is known of it, each line only when there is something to show. */
+  def details(c: ClassEntry, same: Seq[ClassEntry], link: ClassEntry => HtmlElement): Seq[HtmlElement] =
+    val species: Seq[HtmlElement] =
+      if c.pair.isEmpty then Nil
+      else
+        row(
+          "species",
+          span(cls := "mono", c.pair),
+          if c.species.isEmpty then emptyNode else span(cls := "note", s" indices ${c.species.mkString(":")}")
+        )
+    Seq(
+      row("k", c.k.toString),
+      row("source", tag(c), " ", c.source),
+      row("world", s"${c.world} (${c.cells.mkString(", ")})"),
+      species,
+      chambersOf(c).fold(Nil)(n => row("chambers", s"$n (minimal Delaney–Dress symbol)")),
+      if c.key.isEmpty then Nil else row("key", span(cls := "mono", c.key)),
+      if c.word.isEmpty then Nil else row("stacking word", span(cls := "mono", c.word)),
+      c.dossier.toOption.fold(Nil)(d =>
+        row(
+          "dossier",
+          s"valid ${d.valid}, minimal ${d.minimal}, species distinct ${d.distinct}; folding tuple: ${d.tuple}"
         )
       ),
-      child <-- patch.map {
-        case None     => div(cls := "card", p(cls := "note", "loading the patch…"))
-        case Some(pt) => Viewer(i.meta, pt)
-      }
+      c.net.toOption.filter(_.nonEmpty).fold(Nil)(n =>
+        row("net", n, span(cls := "note", " (preliminary identification)"))
+      ),
+      if same.isEmpty then Nil
+      else row("same species set", same.flatMap(o => Seq(link(o), span(", "))).dropRight(1)*)
+    ).flatten
+
+  def classView(i: AtlasIndex, c: ClassEntry, orbits: Boolean): HtmlElement =
+    if orbits then Prefs.orbits.set(true) // #class/<id>?orbits turns the orbits on
+    val classes             = i.classes.toSeq
+    val (prev, next)        = neighbours(classes, c)
+    val same                = sameSpeciesSet(classes, c)
+    val patch               = Signal.fromFuture(Data.patch(c.id))
+    def link(o: ClassEntry) = a(href := Route.fragment(Route.Class(o.id, orbits = false)), o.id)
+    div(
+      // the arrow keys walk the atlas, unless a control (a slider, the search box) has the focus
+      documentEvents(_.onKeyDown).filter(e => !e.target.isInstanceOf[dom.HTMLInputElement]) --> { e =>
+        if e.key == "ArrowLeft" then go(Route.Class(prev.id, orbits = false))
+        if e.key == "ArrowRight" then go(Route.Class(next.id, orbits = false))
+      },
+      div(
+        cls := "bar",
+        button(onClick --> { _ => go(Route.Class(prev.id, orbits = false)) }, s"← ${prev.id}"),
+        button(onClick --> { _ => go(Route.Class(next.id, orbits = false)) }, s"${next.id} →"),
+        span(s"${classes.size} classes; arrows switch")
+      ),
+      div(
+        cls := "classpage",
+        div(
+          cls := "card",
+          h2(s"${c.id} · ${c.name}"),
+          dl(details(c, same, link))
+        ),
+        child <-- patch.map {
+          case None     => div(cls := "card", p(cls := "note", "loading the patch…"))
+          case Some(pt) => Viewer(i.meta, pt)
+        }
+      )
     )

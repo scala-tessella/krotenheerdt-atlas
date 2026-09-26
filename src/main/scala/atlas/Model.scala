@@ -52,6 +52,20 @@ object Model:
     val key: String          = js.native
     val word: String         = js.native
 
+    /** The net's name where one is identified (preliminary), else empty or absent. */
+    val net: js.UndefOr[String] = js.native
+
+    /** The checks of a class found by the stacking enumeration, absent for the others. */
+    val dossier: js.UndefOr[Dossier] = js.native
+
+  /** The checks recorded for a class found by the stacking enumeration. */
+  @js.native
+  trait Dossier extends js.Object:
+    val valid: Boolean    = js.native
+    val minimal: Boolean  = js.native
+    val distinct: Boolean = js.native
+    val tuple: String     = js.native
+
   /** `classes/<id>.json`: the patch of one class. */
   @js.native
   trait ClassPatch extends js.Object:

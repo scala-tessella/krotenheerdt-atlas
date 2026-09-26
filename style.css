@@ -22,3 +22,21 @@ dd { margin: 0; }
 .sw { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 3px; vertical-align: -1px; }
 .sw.dot { border-radius: 50%; }
 canvas.viewer { display: block; width: 100%; height: 520px; cursor: grab; border: 1px solid var(--line); border-radius: 4px; touch-action: none; }
+header .spacer { flex: 1; }
+nav a { text-decoration: none; }
+nav a.on { font-weight: 600; border-bottom: 2px solid var(--link); }
+.filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; font-size: 0.85rem; }
+.filters select, .filters input { font: inherit; padding: 3px 6px; }
+table { width: 100%; font-size: 0.85rem; }
+th.sortable { cursor: pointer; user-select: none; }
+th { position: sticky; top: 0; background: var(--bg); }
+tr.row { cursor: pointer; }
+tr.row:hover { background: color-mix(in srgb, var(--link) 10%, transparent); }
+.tag { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 0.7rem; white-space: nowrap; color: #222; background: #e5e7eb; }
+.tag.lift { background: #dbeafe; } .tag.slab { background: #bbf7d0; } .tag.census { background: #fde68a; }
+.tag.stacking { background: #fbcfe8; } .tag.Barlow { background: #c7d2fe; } .tag.uniform { background: #e5e7eb; }
+.seq td:nth-child(2) { font-weight: 600; }
+.status-theorem, .status-exact { color: #16a34a; } .status-floor { color: #b45309; } .status-open { color: #b91c1c; }
+.prose { max-width: 70em; font-size: 0.9rem; }
+dd { word-break: break-word; }
+button { font: inherit; padding: 2px 8px; }
