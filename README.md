@@ -19,8 +19,8 @@ The application reads a data bundle produced by the atlas export of
     npm run dev                  # Vite development server; the Scala.js code is linked by sbt on demand
     sbt test                     # the Scala.js tests, on Node
 
-`npm run build` writes the static site to `dist/`. The GitHub workflow tests, builds and deploys `dist/` to
-Cloudflare Pages on every push to `main`.
+`npm run build` writes the static site to `dist/`. The GitHub workflow, started by hand from the Actions tab,
+tests, builds and deploys `dist/` to Cloudflare Pages when run on `main`.
 
 ## License
 
