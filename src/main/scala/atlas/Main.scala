@@ -68,37 +68,26 @@ object Main:
     )
 
   def classView(i: AtlasIndex, c: ClassEntry, orbits: Boolean): HtmlElement =
+    if orbits then Prefs.orbits.set(true) // #class/<id>?orbits turns the orbits on
     val patch = Signal.fromFuture(Data.patch(c.id))
     div(
-      h2(s"${c.id} · ${c.name}"),
-      dl(
-        dt("k"),
-        dd(c.k),
-        dt("source"),
-        dd(c.source),
-        dt("chambers"),
-        dd(chambersOf(c).fold("—")(_.toString)),
-        dt("species"),
-        dd(cls := "mono", if c.pair.isEmpty then "—" else c.pair)
-      ),
-      child <-- patch.map {
-        case None    => p(cls := "note", "loading the patch…")
-        case Some(p) => patchSummary(i, p, orbits)
-      }
-    )
-
-  /** What the patch holds: its cells by type (full names on hover) and its vertex orbits. */
-  def patchSummary(i: AtlasIndex, pt: ClassPatch, orbits: Boolean): HtmlElement =
-    val byType = pt.cells.toSeq.groupMapReduce(_.k)(_ => 1)(_ + _).toSeq.sortBy(_._1)
-    div(
-      h3(s"patch: ${pt.cells.length} cells"),
-      ul(
-        byType.map((k, n) =>
-          val short = i.meta.cells(k)
-          li(span(title := i.meta.cellNames.getOrElse(short, short), short), s": $n")
+      cls := "classpage",
+      div(
+        cls := "card",
+        h2(s"${c.id} · ${c.name}"),
+        dl(
+          dt("k"),
+          dd(c.k),
+          dt("source"),
+          dd(c.source),
+          dt("chambers"),
+          dd(chambersOf(c).fold("—")(_.toString)),
+          dt("species"),
+          dd(cls := "mono", if c.pair.isEmpty then "—" else c.pair)
         )
       ),
-      h3(s"${pt.orbits.length} vertex orbit${if pt.orbits.length == 1 then "" else "s"}"),
-      ol(pt.orbits.toSeq.map(o => li(cls := "mono", o))),
-      p(cls := "note", if orbits then "vertex orbits on" else "vertex orbits off")
+      child <-- patch.map {
+        case None     => div(cls := "card", p(cls := "note", "loading the patch…"))
+        case Some(pt) => Viewer(i.meta, pt)
+      }
     )
