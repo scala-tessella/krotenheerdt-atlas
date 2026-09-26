@@ -45,10 +45,11 @@ object Stars:
         h2("Vertex stars"),
         p(
           cls := "prose",
-          "A vertex star is the arrangement of cells around a vertex. The honeycombs of the atlas from k = 2 on are ",
-          "built from the 23 vertex stars below: a k-uniform Krötenheerdt honeycomb has k kinds of vertex, with k ",
-          "pairwise distinct stars. A label counts the cells by type, and its number tells apart the stars with the ",
-          "same cells: {cube:4 p3:6}#1 and #2 both have four cubes and six triangular prisms, arranged differently."
+          "A vertex star is the arrangement of cells around a vertex. Of the 34 arrangements possible around a vertex ",
+          "of a honeycomb, 26 occur in some honeycomb, and the classes of the atlas from k = 2 on use the 23 below: a ",
+          "k-uniform Krötenheerdt honeycomb has k kinds of vertex, with k pairwise distinct stars. A label counts the ",
+          "cells by type, and its number tells apart the stars with the same cells: {cube:4 p3:6}#1 and #2 both have ",
+          "four cubes and six triangular prisms, arranged differently."
         )
       ),
       div(

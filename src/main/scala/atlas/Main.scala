@@ -28,7 +28,7 @@ object Main:
     div(
       windowEvents(_.onHashChange) --> { _ => route.set(Route.parse(dom.window.location.hash)) },
       headerTag(
-        h1(a(href := Route.fragment(Route.Sequence), "Krötenheerdt honeycombs of E³")),
+        h1(a(href := Route.fragment(Route.Home), "Krötenheerdt honeycombs of E³")),
         navTag(
           a(
             href := Route.fragment(Route.Sequence),
@@ -52,6 +52,11 @@ object Main:
             span(cls := "long", "Vertex stars"),
             span(cls := "short", "Stars")
           ),
+          a(
+            href := Route.fragment(Route.Guide(None)),
+            cls("on") <-- route.signal.map { case Route.Guide(_) => true; case _ => false },
+            "Guide"
+          ),
           child.maybe <-- route.signal.map {
             case r: Route.Class => Some(a(href := Route.fragment(r), cls := "on", "Class"))
             case _              => None
@@ -69,7 +74,10 @@ object Main:
       mainTag(
         child <-- index.combineWith(route.signal).map {
           case (None, _)                          => p(cls := "note", "loading the atlas…")
+          case (Some(i), Route.Home)              => Home.view(i)
           case (Some(i), Route.Sequence)          => sequenceView(i)
+          case (Some(_), Route.Guide(section))    => Guide.view(section)
+          case (Some(i), Route.About)             => About.view(i.classes.length)
           case (Some(i), Route.Lifts(k))          => Lifts.view(i, k)
           case (Some(i), Route.Stars)             => Stars.view(i)
           case (Some(i), Route.Star(n))           => Stars.page(i, n)
@@ -79,6 +87,12 @@ object Main:
           case (Some(i), Route.Class(id, orbits)) =>
             i.classes.find(_.id == id).fold(p(cls := "note", s"no class $id"))(classView(i, _, orbits))
         }
+      ),
+      footerTag(
+        a(href   := Route.fragment(Route.Guide(None)), "Guide"),
+        a(href   := Route.fragment(Route.About), "About"),
+        span(cls := "note", s"data ${DataVersion.value}"),
+        a(href   := "https://www.tessell.art", target := "_blank", rel := "noopener", "tessell.art")
       )
     )
 
@@ -304,7 +318,22 @@ object Main:
 
   // ---------- a class ----------
 
-  private def row(title: String, value: Modifier[HtmlElement]*): Seq[HtmlElement] = Seq(dt(title), dd(value*))
+  /** The guide's section for a term of the class page's list. */
+  private val guideOf: Map[String, String] = Map(
+    "species"       -> "stars",
+    "world"         -> "worlds",
+    "chambers"      -> "symbols",
+    "key"           -> "symbols",
+    "stacking word" -> "words",
+    "source"        -> "certificates"
+  )
+
+  /** A line of the class page's list, its term linked to the guide where the guide explains it. */
+  private def row(title: String, value: Modifier[HtmlElement]*): Seq[HtmlElement] =
+    val term = guideOf.get(title).fold[Modifier[HtmlElement]](title)(g =>
+      a(cls := "term", href := Route.fragment(Route.Guide(Some(g))), title)
+    )
+    Seq(dt(term), dd(value*))
 
   /** The class's description list: what is known of it, each line only when there is something to show. */
   def details(

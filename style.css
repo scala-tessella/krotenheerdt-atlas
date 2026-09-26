@@ -210,3 +210,40 @@ svg.word-strip { width: 100%; height: auto; display: block; margin: 6px 0; }
   .suggestions { left: 0; right: auto; width: 100%; }
   .star-grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* home, guide, about, footer */
+.hero h2 { font-size: 1.6rem; margin-bottom: 8px; }
+svg.chart { width: 100%; max-width: 680px; height: auto; display: block; margin: 12px 0 4px; }
+svg.chart .axis { stroke: var(--line); }
+svg.chart .bar-space { fill: var(--accent); }
+svg.chart .bar-plane { fill: color-mix(in srgb, var(--accent) 35%, var(--surface)); }
+svg.chart .bar-value { font: 13px var(--sans); fill: var(--ink); }
+svg.chart .bar-k { font: 13px var(--sans); fill: var(--muted); }
+.chart-legend { font-size: .85rem; color: var(--muted); }
+.chart-legend .sw.space { background: var(--accent); }
+.chart-legend .sw.plane { background: color-mix(in srgb, var(--accent) 35%, var(--surface)); margin-left: 10px; }
+.entries { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: var(--gap) 0; }
+.entry, .featured { text-decoration: none; color: var(--ink); display: block; }
+.entry:hover, .featured:hover { border-color: var(--accent); }
+.entry h3, .featured h3 { color: var(--accent); margin-bottom: 4px; }
+.entry p, .featured p { margin: 0; font-size: .9rem; color: var(--muted); }
+.section-title { margin-top: 26px; }
+.featured-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.featured .id { color: var(--accent); }
+.featured h3 { font-family: var(--sans); font-size: .95rem; word-break: break-word; margin-top: 6px; }
+.guide-section { margin: var(--gap) 0; scroll-margin-top: 70px; }
+.guide .toc { columns: 2; font-size: .95rem; }
+.guide .prose p, .guide .prose li { margin: 8px 0; }
+.about .card { margin-bottom: var(--gap); }
+.refs li { margin: 8px 0; }
+.cite { background: var(--soft); padding: 8px 10px; border-radius: 6px; word-break: break-word; }
+dt a.term { color: var(--muted); text-decoration: underline dotted; text-underline-offset: 3px; }
+dt a.term:hover { color: var(--accent); }
+footer { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; padding: 20px; border-top: 1px solid var(--line);
+  font-size: .85rem; }
+@media (max-width: 760px) {
+  nav { overflow-x: auto; flex-wrap: nowrap; max-width: 100%; }
+  .guide .toc { columns: 1; }
+  .hero h2 { font-size: 1.3rem; }
+  svg.chart .bar-value, svg.chart .bar-k { font-size: 18px; }
+}
