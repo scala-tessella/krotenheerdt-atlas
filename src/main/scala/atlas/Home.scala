@@ -55,6 +55,17 @@ object Home:
             svg.cls        := "bar-value",
             r.n.toString
           ),
+          // the planar value on its own bar (left out at zero, where the spatial 0 already stands)
+          if planar == 0 then svg.g()
+          else
+            svg.text(
+              svg.x          := (x + slot * 0.56).toString,
+              svg.y          := (base - height(planar) - 5).toString,
+              svg.textAnchor := "middle",
+              svg.cls        := "bar-value plane",
+              planar.toString
+            )
+          ,
           svg.text(
             svg.x          := (x + slot * 0.37).toString,
             svg.y          := (base + 18).toString,

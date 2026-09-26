@@ -218,6 +218,7 @@ svg.chart .axis { stroke: var(--line); }
 svg.chart .bar-space { fill: var(--accent); }
 svg.chart .bar-plane { fill: color-mix(in srgb, var(--accent) 35%, var(--surface)); }
 svg.chart .bar-value { font: 13px var(--sans); fill: var(--ink); }
+svg.chart .bar-value.plane { fill: var(--muted); }
 svg.chart .bar-k { font: 13px var(--sans); fill: var(--muted); }
 .chart-legend { font-size: .85rem; color: var(--muted); }
 .chart-legend .sw.space { background: var(--accent); }
