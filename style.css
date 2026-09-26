@@ -136,7 +136,7 @@ canvas.viewer:active { cursor: grabbing; }
   dt { margin-top: 8px; font-size: .8rem; }
 }
 
-/* the planar lifts */
+/* the prismatic lifts */
 .intro { margin-bottom: var(--gap); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .chip { text-decoration: none; color: var(--ink); border: 1px solid var(--line); border-radius: 14px; padding: 2px 10px;

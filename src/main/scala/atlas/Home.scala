@@ -132,7 +132,7 @@ object Home:
         ),
         entry(
           Route.Lifts(None),
-          "Planar lifts",
+          "Prismatic lifts",
           "The 135 planar Krötenheerdt tilings, lifted into space, and drawn."
         ),
         entry(

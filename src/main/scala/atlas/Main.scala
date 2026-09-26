@@ -52,7 +52,7 @@ object Main:
           a(
             href := Route.fragment(Route.Lifts(None)),
             cls("on") <-- route.signal.map { case Route.Lifts(_) => true; case _ => false },
-            span(cls := "long", "Planar lifts"),
+            span(cls := "long", "Prismatic lifts"),
             span(cls := "short", "Lifts")
           ),
           a(
@@ -128,7 +128,7 @@ object Main:
         cls := "prose",
         "Every planar Krötenheerdt tiling is here too: stacked into prisms it becomes a honeycomb of the atlas, its ",
         "prismatic lift. The planar sequence sits inside the spatial one, row by row — ",
-        a(href := Route.fragment(Route.Lifts(None)), "browse the planar lifts"),
+        a(href := Route.fragment(Route.Lifts(None)), "browse the prismatic lifts"),
         "."
       ),
       div(
@@ -163,7 +163,7 @@ object Main:
                     n =>
                       a(
                         href       := Route.fragment(Route.Lifts(Some(r.k))),
-                        aria.label := s"the $n planar lifts of k = ${r.k}",
+                        aria.label := s"the $n prismatic lifts of k = ${r.k}",
                         n
                       )
                   )
@@ -237,7 +237,7 @@ object Main:
             onClick.mapToChecked --> { b => filter.update(_.copy(liftsOnly = b)) }
           )
         ),
-        "planar lifts only"
+        "prismatic lifts only"
       ),
       button(cls := "quiet", onClick --> { _ => filter.set(Filter()) }, "clear")
     )

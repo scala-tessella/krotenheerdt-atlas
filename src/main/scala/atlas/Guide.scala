@@ -138,7 +138,7 @@ object Guide:
             "28, and at every k the planar tilings among the N",
             sub("k"),
             ". ",
-            to(Route.Lifts(None), "The planar lifts"),
+            to(Route.Lifts(None), "The prismatic lifts"),
             " page draws them all."
           )
         )
@@ -263,7 +263,7 @@ object Guide:
           ),
           p(
             "A patch is a finite piece of an infinite honeycomb: a box around a vertex, wide enough to show the ",
-            "pattern repeat, and for a planar lift a slab three floors high over a square of the tiling."
+            "pattern repeat, and for a prismatic lift a slab three floors high over a square of the tiling."
           )
         )
     )

@@ -4,8 +4,8 @@ import Catalog.Filter
 
 /** The application's places, kept in the URL fragment so the static site needs no server-side routing: `#`
   * (the home page), `#sequence`, `#classes` (with the table's filter as a query,
-  * `#classes?k=5&world=prism&sort=chambers`, so a filtered list can be linked), `#lifts` (the planar lifts,
-  * `/k=<k>` for one row), `#stars` and `#star/<species index>` (the vertex stars), `#guide` (and
+  * `#classes?k=5&world=prism&sort=chambers`, so a filtered list can be linked), `#lifts` (the prismatic
+  * lifts, `/k=<k>` for one row), `#stars` and `#star/<species index>` (the vertex stars), `#guide` (and
   * `#guide/<section>`), `#about`, `#class/<id>` (with `?orbits` to switch the vertex orbits on). The
   * fragments of the earlier atlas page (`#counts`, `#table`, `#table/k=<k>`) and `#classes/k=<k>` still lead
   * to the same places.

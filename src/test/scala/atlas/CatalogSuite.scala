@@ -96,7 +96,7 @@ class CatalogSuite extends munit.FunSuite:
       3
     )
 
-  test("the planar lifts only: the lifts of every k, with the uniform prismatic ones"):
+  test("the prismatic lifts only: the lifts of every k, with the uniform prismatic ones"):
     val prismatic = entry(
       "k1-020",
       1,
