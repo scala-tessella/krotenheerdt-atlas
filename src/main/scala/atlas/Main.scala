@@ -28,7 +28,7 @@ object Main:
     div(
       windowEvents(_.onHashChange) --> { _ => route.set(Route.parse(dom.window.location.hash)) },
       headerTag(
-        h1("Krötenheerdt honeycombs of E³"),
+        h1(a(href := Route.fragment(Route.Sequence), "Krötenheerdt honeycombs of E³")),
         navTag(
           a(
             href := Route.fragment(Route.Sequence),
@@ -47,7 +47,7 @@ object Main:
         ),
         span(cls := "spacer"),
         span(
-          cls    := "note",
+          cls    := "note total",
           child.text <-- index.map(_.fold("")(i =>
             s"${i.classes.length} classes, k = 1 to ${i.classes.map(_.k).max}"
           ))
@@ -83,23 +83,34 @@ object Main:
         "tiling; the planar numbers are 11, 20, 39, 33, 15, 10, 7 and then 0. The three-dimensional sequence reads ",
         "28, 57, 119, 146, 122, 78, 16 and vanishes from k = 8 on, at the same point as the planar one."
       ),
-      table(
-        cls := "seq",
-        thead(tr(th("k"), th("N", sub("k")), th("status"), th("composition"), th("atlas"))),
-        tbody(
-          i.sequence.toSeq.sortBy(_.k).map { r =>
-            val listed = classes.count(_.k == r.k)
-            tr(
-              td(r.k),
-              td(r.n),
-              td(cls := s"status-${r.status}", r.status),
-              td(r.note),
-              td(
-                if listed == 0 then ""
-                else a(href := Route.fragment(Route.Classes(Some(r.k))), s"$listed in the atlas")
+      div(
+        cls := "table-wrap",
+        table(
+          cls := "seq",
+          thead(tr(th("k"), th("N", sub("k")), th("status"), th("composition"), th("atlas"))),
+          tbody(
+            i.sequence.toSeq.sortBy(_.k).map { r =>
+              val listed = classes.count(_.k == r.k)
+              tr(
+                td(r.k),
+                td(
+                  if listed == 0 then r.n.toString
+                  else
+                    a(
+                      href       := Route.fragment(Route.Classes(Some(r.k))),
+                      aria.label := s"the $listed classes of k = ${r.k}",
+                      r.n
+                    )
+                ),
+                td(cls := s"status-${r.status}", r.status),
+                td(r.note),
+                td(
+                  if listed == 0 then ""
+                  else a(href := Route.fragment(Route.Classes(Some(r.k))), s"$listed in the atlas")
+                )
               )
-            )
-          }
+            }
+          )
         )
       ),
       p(
@@ -131,62 +142,115 @@ object Main:
       )
     )
 
+  /** How many rows of the list are shown; reset to a page whenever the filter changes. */
+  private val shown: Var[Int] = Var(Layout.pageSize)
+
   def classesView(i: AtlasIndex): HtmlElement =
-    val classes = i.classes.toSeq
-    val rows    = filter.signal.map(Catalog.rows(classes, _))
+    val classes     = i.classes.toSeq
+    val rows        = filter.signal.map(Catalog.rows(classes, _))
+    val visible     = rows.combineWith(shown.signal).map((r, n) => r.take(n))
+    val filtersOpen = Var(false)
+    val controls    = Seq(
+      choice("k", choices(classes, _.k.toString), _.k.map(_.toString), (f, v) => f.copy(k = v.map(_.toInt))),
+      choice("world", choices(classes, _.world), _.world, (f, v) => f.copy(world = v)),
+      choice("source", choices(classes, _.cat), _.source, (f, v) => f.copy(source = v)),
+      label(
+        cls      := "search",
+        "search",
+        input(
+          typ         := "search",
+          placeholder := "species label, name, word, key",
+          controlled(
+            value <-- filter.signal.map(_.text),
+            onInput.mapToValue --> { t => filter.update(_.copy(text = t)) }
+          )
+        )
+      ),
+      button(cls := "quiet", onClick --> { _ => filter.set(Filter()) }, "clear")
+    )
     div(
+      filter.signal.changes --> { _ => shown.set(Layout.pageSize) },
       div(
-        cls := "filters",
-        choice(
-          "k",
-          choices(classes, _.k.toString),
-          _.k.map(_.toString),
-          (f, v) => f.copy(k = v.map(_.toInt))
-        ),
-        choice("world", choices(classes, _.world), _.world, (f, v) => f.copy(world = v)),
-        choice("source", choices(classes, _.cat), _.source, (f, v) => f.copy(source = v)),
-        label(
-          "search ",
-          input(
-            placeholder := "species label, name, word, key",
-            size        := 34,
-            controlled(
-              value <-- filter.signal.map(_.text),
-              onInput.mapToValue --> { t => filter.update(_.copy(text = t)) }
-            )
+        cls   := "toolbar",
+        button(
+          cls    := "filters-toggle",
+          aria.expanded <-- filtersOpen.signal,
+          onClick --> { _ => filtersOpen.update(!_) },
+          child.text <-- filter.signal.map(f =>
+            if activeFilters(f) == 0 then "Filters" else s"Filters (${activeFilters(f)})"
           )
         ),
-        span(cls := "note", child.text <-- rows.map(r => s"${r.size} classes"))
+        span(cls := "note", child.text <-- rows.map(r => s"${r.size} of ${classes.size} classes"))
       ),
-      table(
-        thead(
-          tr(
-            Column.values.toSeq.map(col =>
-              th(
-                cls := "sortable",
-                onClick --> { _ => filter.update(_.sortedBy(col)) },
-                child.text <-- filter.signal.map(f =>
-                  col.title + (if f.sort == col then if f.ascending then " ▲" else " ▼" else "")
+      div(cls := "filters", cls("open") <-- filtersOpen.signal, controls),
+      child <-- Layout.narrow.signal.map { narrow =>
+        if narrow then div(cls := "cards", children <-- visible.map(_.map(card)))
+        else
+          table(
+            cls                := "classes",
+            thead(
+              tr(
+                Column.values.toSeq.map(col =>
+                  th(
+                    cls := "sortable",
+                    onClick --> { _ => filter.update(_.sortedBy(col)) },
+                    child.text <-- filter.signal.map(f =>
+                      col.title + (if f.sort == col then if f.ascending then " ▲" else " ▼" else "")
+                    )
+                  )
                 )
               )
+            ),
+            tbody(children <-- visible.map(_.map(tableRow)))
+          )
+      },
+      // the end of the list: coming into view, it shows a page more
+      child.maybe <-- rows.combineWith(shown.signal).map((r, n) =>
+        Option.when(n < r.size)(
+          div(
+            cls := "more",
+            onMountCallback { ctx =>
+              val observer = new dom.IntersectionObserver((entries, _) =>
+                if entries.exists(_.isIntersecting) then shown.update(_ + Layout.pageSize)
+              )
+              observer.observe(ctx.thisNode.ref)
+            },
+            button(
+              cls := "quiet",
+              onClick --> { _ => shown.update(_ + Layout.pageSize) },
+              s"show more (${r.size - n} left)"
             )
           )
-        ),
-        tbody(
-          children <-- rows.map(_.map(c =>
-            tr(
-              cls := "row",
-              onClick --> { _ => go(Route.Class(c.id, orbits = false)) },
-              td(cls := "mono", c.id),
-              td(c.k),
-              td(c.name),
-              td(tag(c)),
-              td(c.world),
-              td(chambersOf(c).fold("")(_.toString)),
-              td(cls := "mono", if c.pair.nonEmpty then c.pair else c.cells.mkString(" "))
-            )
-          ))
         )
+      )
+    )
+
+  private def classLink(c: ClassEntry): Route = Route.Class(c.id, orbits = false)
+
+  private def tableRow(c: ClassEntry): HtmlElement =
+    tr(
+      cls := "row",
+      onClick --> { _ => go(classLink(c)) },
+      td(a(cls := "mono", href := Route.fragment(classLink(c)), c.id)),
+      td(c.k),
+      td(c.name),
+      td(tag(c)),
+      td(c.world),
+      td(chambersOf(c).fold("")(_.toString)),
+      td(cls := "mono", if c.pair.nonEmpty then c.pair else c.cells.mkString(" "))
+    )
+
+  /** A class as a card, on narrow screens: id, name, tags and chambers, and one line of species. */
+  private def card(c: ClassEntry): HtmlElement =
+    a(
+      cls  := "class-card",
+      href := Route.fragment(classLink(c)),
+      div(cls := "card-head", span(cls := "mono id", c.id), tag(c), span(cls := "world", c.world)),
+      div(cls := "card-name", c.name),
+      div(
+        cls   := "card-meta",
+        chambersOf(c).fold("")(n => s"$n chambers"),
+        span(cls := "mono species", if c.pair.nonEmpty then c.pair else c.cells.mkString(" "))
       )
     )
 
@@ -239,16 +303,16 @@ object Main:
         if e.key == "ArrowRight" then go(Route.Class(next.id, orbits = false))
       },
       div(
-        cls := "bar",
+        cls  := "nav-bar",
         button(onClick --> { _ => go(Route.Class(prev.id, orbits = false)) }, s"← ${prev.id}"),
         button(onClick --> { _ => go(Route.Class(next.id, orbits = false)) }, s"${next.id} →"),
         span(s"${classes.size} classes; arrows switch")
       ),
+      h2(cls := "class-title", span(cls := "mono id", c.id), " ", c.name),
       div(
-        cls := "classpage",
+        cls  := "classpage",
         div(
           cls := "card",
-          h2(s"${c.id} · ${c.name}"),
           dl(details(c, same, link))
         ),
         child <-- patch.map {

@@ -71,3 +71,11 @@ class CatalogSuite extends munit.FunSuite:
   test("the neighbours wrap around the atlas"):
     assertEquals(neighbours(all, cubic) match { case (p, n) => (p.id, n.id) }, ("k3-001", "k2-001"))
     assertEquals(neighbours(all, d) match { case (p, n) => (p.id, n.id) }, ("k2-003", "k1-004"))
+
+  test("the active filters are counted, the sort aside"):
+    assertEquals(activeFilters(Filter()), 0)
+    assertEquals(activeFilters(Filter(k = Some(2), text = "  ")), 1)
+    assertEquals(
+      activeFilters(Filter(world = Some("slab"), source = Some("lift"), text = "cube").sortedBy(Column.K)),
+      3
+    )

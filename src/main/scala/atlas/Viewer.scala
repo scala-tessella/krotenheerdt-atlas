@@ -1,55 +1,79 @@
 package atlas
 
-import scala.scalajs.js
-
 import com.raquo.laminar.api.L.*
 import org.scalajs.dom
 
 import Model.*
 
 /** The patch viewer: the cells of a class on a canvas (the scene of [[Scene]], painted farthest first),
-  * dragged to rotate and wheeled to zoom, with the cell legend (full names on hover), the shrink and height
-  * sliders, the vertex orbits switch and the orbit legend. The angles and the zoom are kept for the visit, so
-  * the next class opens seen from the same side; the settings are the remembered [[Prefs]].
+  * turned by dragging, zoomed by pinching or the wheel, reset by a double tap or click ([[Gesture]]), with
+  * the cell legend (full names on hover), the shrink and height sliders, the vertex orbits switch and the
+  * orbit legend. While a gesture is in progress the drawing is lighter (no outlines, no vertex spheres) and
+  * it is repainted at most once per animation frame, sharp on dense screens. The angles and the zoom are kept
+  * for the visit, so the next class opens seen from the same side; the settings are the remembered [[Prefs]].
   */
 object Viewer:
 
-  private val az   = Var(-0.56)
-  private val el   = Var(0.37)
-  private val zoom = Var(1.0)
+  private val home = (-0.56, 0.37, 1.0)
+  private val az   = Var(home._1)
+  private val el   = Var(home._2)
+  private val zoom = Var(home._3)
+
+  private def reset(): Unit =
+    az.set(home._1); el.set(home._2); zoom.set(home._3)
 
   def apply(meta: Meta, patch: ClassPatch): HtmlElement =
-    val canvas = canvasTag(cls := "viewer")
-    val view   = Prefs.shrink.signal
-      .combineWith(Prefs.cut.signal, Prefs.orbits.signal, az.signal, el.signal)
-      .map((s, c, o, a, e) => Scene.View(a, e, s / 100.0, c / 1000.0, o))
-    val items  = view.map(Scene.items(patch.cells, _))
-    var drag   = Option.empty[(Double, Double)]
+    val canvas   = canvasTag(cls := "viewer", aria.label := s"the ${patch.cells.length} cells of ${patch.id}")
+    val dragging = Var(false)
+    var gesture  = Gesture.State()
+    val view     = Prefs.shrink.signal
+      .combineWith(Prefs.cut.signal, Prefs.orbits.signal, az.signal, el.signal, dragging.signal)
+      .map((s, c, o, a, e, d) => (Scene.View(a, e, s / 100.0, c / 1000.0, o && !d), d))
+    val frame    = view.map((v, d) => (Scene.items(patch.cells, v), d)).combineWith(zoom.signal)
+
+    // the latest frame, painted on the next animation frame (several changes in one frame paint once)
+    var latest           = Option.empty[(Vector[Scene.Item], Boolean, Double)]
+    var pending          = false
+    def schedule(): Unit =
+      if !pending then
+        pending = true
+        dom.window.requestAnimationFrame { _ =>
+          pending = false
+          latest.foreach((is, light, z) => paint(canvas.ref, is, z, light))
+        }
+
+    def act(a: Gesture.Action): Unit = a match
+      case Gesture.Action.Rotate(dx, dy) =>
+        az.update(_ - dx * 0.008)
+        el.update(v => math.max(-1.5, math.min(1.5, v + dy * 0.008)))
+      case Gesture.Action.Zoom(f)        => zoom.update(z => math.max(0.2, math.min(12, z * f)))
+      case Gesture.Action.Reset          => reset()
+      case Gesture.Action.Nothing        => ()
+
     div(
-      cls := "card",
-      h3("Patch"),
-      div(cls := "bar", cellLegend(meta, patch)),
+      cls := "card viewer-card",
+      div(cls := "legend", cellLegend(meta, patch)),
       canvas.amend(
         onPointerDown --> { e =>
-          drag = Some((e.clientX, e.clientY)); canvas.ref.setPointerCapture(e.pointerId)
+          canvas.ref.setPointerCapture(e.pointerId)
+          val (s, a) = Gesture.down(gesture, e.pointerId.toInt, e.clientX, e.clientY, e.timeStamp)
+          gesture = s; dragging.set(Gesture.active(s)); act(a)
         },
         onPointerMove --> { e =>
-          drag.foreach { (x, y) =>
-            az.update(_ - (e.clientX - x) * 0.008)
-            el.update(v => math.max(-1.5, math.min(1.5, v + (e.clientY - y) * 0.008)))
-            drag = Some((e.clientX, e.clientY))
-          }
+          val (s, a) = Gesture.move(gesture, e.pointerId.toInt, e.clientX, e.clientY)
+          gesture = s; act(a)
         },
-        onPointerUp --> { _ => drag = None },
-        onWheel.preventDefault --> { e => zoom.update(_ * (if e.deltaY < 0 then 1.1 else 0.9)) },
-        items.combineWith(zoom.signal) --> { (is, z) => paint(canvas.ref, is, z) },
-        windowEvents(_.onResize).sample(items, zoom.signal) --> { (is, z) => paint(canvas.ref, is, z) }
+        List(onPointerUp, onPointerCancel).map(_ --> { (e: dom.PointerEvent) =>
+          gesture = Gesture.up(gesture, e.pointerId.toInt); dragging.set(Gesture.active(gesture))
+        }),
+        onWheel.preventDefault --> { e => act(Gesture.Action.Zoom(if e.deltaY < 0 then 1.1 else 1 / 1.1)) },
+        frame --> { (is, light, z) => latest = Some((is, light, z)); schedule() },
+        windowEvents(_.onResize) --> { _ => schedule() }
       ),
       div(
-        cls   := "bar",
-        span("drag to rotate · wheel to zoom"),
+        cls   := "controls",
         label(
-          "shrink ",
+          "shrink",
           input(
             typ     := "range",
             minAttr := "55",
@@ -61,7 +85,7 @@ object Viewer:
           )
         ),
         label(
-          "height ",
+          "height",
           input(
             typ     := "range",
             minAttr := "0",
@@ -73,16 +97,21 @@ object Viewer:
           )
         ),
         label(
+          cls      := "switch",
           input(
             typ := "checkbox",
             controlled(checked <-- Prefs.orbits.signal, onClick.mapToChecked --> Prefs.orbits)
           ),
-          " vertex orbits"
+          "vertex orbits"
         ),
-        span(s"${patch.cells.length} cells")
+        button(cls := "quiet", onClick --> { _ => reset() }, "reset view")
+      ),
+      p(
+        cls   := "hint",
+        s"${patch.cells.length} cells · drag to turn · pinch or wheel to zoom · double-tap to reset"
       ),
       div(
-        cls   := "bar",
+        cls   := "orbit-legend",
         children <-- Prefs.orbits.signal.map { on =>
           if !on then Nil
           else if patch.orbits.isEmpty then List(span("no orbit data for this patch"))
@@ -90,7 +119,7 @@ object Viewer:
             patch.orbits.toList.zipWithIndex.map((label, i) =>
               span(
                 span(cls := "sw dot", backgroundColor := Palette.orbitCss(i)),
-                s"orbit ${i + 1}: ",
+                s"orbit ${i + 1} ",
                 span(cls := "mono", label)
               )
             )
@@ -109,13 +138,18 @@ object Viewer:
       )
     }
 
-  /** Paints the items on the canvas, fitted to it and scaled by the zoom. */
-  def paint(cv: dom.HTMLCanvasElement, items: Vector[Scene.Item], zoom: Double): Unit =
-    val (w, h) = (cv.clientWidth, cv.clientHeight)
-    cv.width = w
-    cv.height = h
+  /** Paints the items on the canvas, fitted to it and scaled by the zoom, at the screen's pixel density;
+    * `light` leaves out the outlines (while a gesture is in progress).
+    */
+  def paint(cv: dom.HTMLCanvasElement, items: Vector[Scene.Item], zoom: Double, light: Boolean): Unit =
+    val (w, h) = (cv.clientWidth.toDouble, cv.clientHeight.toDouble)
+    val dpr    = math.max(1.0, dom.window.devicePixelRatio)
+    cv.width = math.round(w * dpr).toInt
+    cv.height = math.round(h * dpr).toInt
     val cx     = cv.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
-    cx.fillStyle = "#fff"
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    val bg     = dom.window.getComputedStyle(cv).getPropertyValue("--canvas").trim
+    cx.fillStyle = if bg.nonEmpty then bg else "#fff"
     cx.fillRect(0, 0, w, h)
     if items.nonEmpty then
       val (x0, x1, y0, y1)        = Scene.bounds(items)
@@ -134,12 +168,13 @@ object Viewer:
             cx.closePath()
             cx.fillStyle = color
             cx.fill()
-            cx.strokeStyle = "rgba(20,20,20,0.4)"
-            cx.stroke()
+            if !light then
+              cx.strokeStyle = "rgba(20,20,20,0.4)"
+              cx.stroke()
           case Scene.Dot(_, at, color)   =>
             val (x, y) = px(at)
             cx.beginPath()
-            cx.arc(x, y, math.max(2.5, s * 0.12), 0, 2 * math.Pi)
+            cx.arc(x, y, math.max(1.5, s * 0.12), 0, 2 * math.Pi)
             cx.fillStyle = color
             cx.fill()
             cx.strokeStyle = "rgba(0,0,0,0.5)"

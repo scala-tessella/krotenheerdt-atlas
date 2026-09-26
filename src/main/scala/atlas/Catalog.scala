@@ -56,6 +56,10 @@ object Catalog:
     val ord  = ordering(f.sort)
     kept.sorted(using if f.ascending then ord else ord.reverse)
 
+  /** How many filters are set (the sort is not a filter). */
+  def activeFilters(f: Filter): Int =
+    Seq(f.k.isDefined, f.world.isDefined, f.source.isDefined, f.text.trim.nonEmpty).count(identity)
+
   /** The distinct values of a column over the classes, sorted, for its filter's choices. */
   def choices(classes: Seq[ClassEntry], value: ClassEntry => String): Seq[String] =
     classes.map(value).distinct.sorted
