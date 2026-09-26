@@ -24,7 +24,10 @@ object Lifts:
   def drawing(t: TilingDrawing, window: Option[Double], label: String): SvgElement =
     val (x, y, w, h)                 = (t.box(0), t.box(1), t.box(2), t.box(3))
     val (cx, cy)                     = (x + w / 2, y + h / 2)
-    val (vw, vh)                     = window.fold((w, h))(s => (math.min(s, w), math.min(s, h)))
+    // a crop stays inside the patch's ragged edge (polygons up to a dodecagon's radius past the square)
+    val (vw, vh)                     = window.fold((w, h)) { s =>
+      val side = math.max(3.0, math.min(s, math.min(w, h) - 3.8)); (side, side)
+    }
     val pad                          = 0.1
     svg.svg(
       svg.cls                 := "tiling",
