@@ -31,6 +31,43 @@ object Catalog:
     def sortedBy(c: Column): Filter =
       if c == sort then copy(ascending = !ascending) else copy(sort = c, ascending = true)
 
+    /** The filter as a query string (`k=5&world=prism&source=lift&q=cube&lifts&sort=chambers&desc`), only
+      * what differs from the default; the inverse of [[Filter.fromQuery]].
+      */
+    def toQuery: String =
+      Seq(
+        k.map(n => s"k=$n"),
+        world.map(w => s"world=${encode(w)}"),
+        source.map(s => s"source=${encode(s)}"),
+        Option(text.trim).filter(_.nonEmpty).map(t => s"q=${encode(t)}"),
+        Option.when(liftsOnly)("lifts"),
+        Option.when(sort != Column.Id)(s"sort=${sort.title}"),
+        Option.when(!ascending)("desc")
+      ).flatten.mkString("&")
+
+  object Filter:
+
+    /** A filter from its query string; unknown or malformed parts are ignored. */
+    def fromQuery(query: String): Filter =
+      val parts = query.stripPrefix("?").split('&').toSeq.filter(_.nonEmpty).map(_.split("=", 2)).map(p =>
+        (p(0), if p.length > 1 then decode(p(1)) else "")
+      )
+      val get   = parts.toMap
+      Filter(
+        k = get.get("k").flatMap(_.toIntOption),
+        world = get.get("world").filter(_.nonEmpty),
+        source = get.get("source").filter(_.nonEmpty),
+        text = get.getOrElse("q", ""),
+        liftsOnly = get.contains("lifts"),
+        sort = get.get("sort").flatMap(t => Column.values.find(_.title == t)).getOrElse(Column.Id),
+        ascending = !get.contains("desc")
+      )
+
+  private def encode(s: String): String = scala.scalajs.js.URIUtils.encodeURIComponent(s)
+  private def decode(s: String): String =
+    try scala.scalajs.js.URIUtils.decodeURIComponent(s)
+    catch case _: Throwable => s
+
   /** What the search text is matched against: the name, the species, the stacking word, the key and the
     * species indices.
     */

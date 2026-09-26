@@ -27,6 +27,15 @@ object Main:
     val index = Signal.fromFuture(Data.index)
     div(
       windowEvents(_.onHashChange) --> { _ => route.set(Route.parse(dom.window.location.hash)) },
+      // the first stop of the keyboard: straight to the page's content, past the header
+      a(
+        cls      := "skip",
+        href     := "",
+        onClick.preventDefault --> { _ =>
+          Option(dom.document.getElementById("content")).foreach(_.asInstanceOf[dom.HTMLElement].focus())
+        },
+        "skip to content"
+      ),
       headerTag(
         h1(a(href := Route.fragment(Route.Home), "Krötenheerdt honeycombs of E³")),
         navTag(
@@ -36,7 +45,7 @@ object Main:
             "Sequence"
           ),
           a(
-            href := Route.fragment(Route.Classes(None)),
+            href <-- filter.signal.map(f => Route.fragment(Route.Classes(f))),
             cls("on") <-- route.signal.map { case Route.Classes(_) => true; case _ => false },
             "Classes"
           ),
@@ -72,6 +81,8 @@ object Main:
         )
       ),
       mainTag(
+        idAttr   := "content",
+        tabIndex := -1,
         child <-- index.combineWith(route.signal).map {
           case (None, _)                          => p(cls := "note", "loading the atlas…")
           case (Some(i), Route.Home)              => Home.view(i)
@@ -81,8 +92,8 @@ object Main:
           case (Some(i), Route.Lifts(k))          => Lifts.view(i, k)
           case (Some(i), Route.Stars)             => Stars.view(i)
           case (Some(i), Route.Star(n))           => Stars.page(i, n)
-          case (Some(i), Route.Classes(k))        =>
-            k.foreach(k => filter.update(_.copy(k = Some(k))))
+          case (Some(i), Route.Classes(f))        =>
+            filter.set(f) // the table opens as its URL says
             classesView(i)
           case (Some(i), Route.Class(id, orbits)) =>
             i.classes.find(_.id == id).fold(p(cls := "note", s"no class $id"))(classView(i, _, orbits))
@@ -142,7 +153,7 @@ object Main:
                   if listed == 0 then r.n.toString
                   else
                     a(
-                      href       := Route.fragment(Route.Classes(Some(r.k))),
+                      href       := Route.fragment(Route.Classes(Filter(k = Some(r.k)))),
                       aria.label := s"the $listed classes of k = ${r.k}",
                       r.n
                     )
@@ -231,7 +242,12 @@ object Main:
       button(cls := "quiet", onClick --> { _ => filter.set(Filter()) }, "clear")
     )
     div(
-      filter.signal.changes --> { _ => shown.set(Layout.pageSize) },
+      // every change of the filter shows the first page again and is written into the URL, replacing the entry
+      // (no history step, no re-render: the search box keeps its focus while one types)
+      filter.signal.changes --> { f =>
+        shown.set(Layout.pageSize)
+        dom.window.history.replaceState(null, "", Route.fragment(Route.Classes(f)))
+      },
       div(
         cls   := "toolbar",
         button(
@@ -253,11 +269,18 @@ object Main:
             thead(
               tr(
                 Column.values.toSeq.map(col =>
+                  // a header sorts by its column, a button for the keyboard; the sort is announced
                   th(
                     cls := "sortable",
-                    onClick --> { _ => filter.update(_.sortedBy(col)) },
-                    child.text <-- filter.signal.map(f =>
-                      col.title + (if f.sort == col then if f.ascending then " ▲" else " ▼" else "")
+                    aria.sort <-- filter.signal.map(f =>
+                      if f.sort != col then "none" else if f.ascending then "ascending" else "descending"
+                    ),
+                    button(
+                      cls := "sort",
+                      onClick --> { _ => filter.update(_.sortedBy(col)) },
+                      child.text <-- filter.signal.map(f =>
+                        col.title + (if f.sort == col then if f.ascending then " ▲" else " ▼" else "")
+                      )
                     )
                   )
                 )

@@ -38,8 +38,14 @@ object ClassParts:
           cls := "orbit-rows",
           patch.orbits.toSeq.zipWithIndex.map((label, i) =>
             div(
-              cls      := "orbit-row",
-              tabIndex := 0,
+              cls        := "orbit-row",
+              tabIndex   := 0,
+              role       := "button",
+              aria.pressed <-- Viewer.highlight.signal.map(_.contains(i).toString),
+              aria.label := s"orbit ${i + 1}: ${Species.describe(label)}; show its vertices",
+              onKeyDown.filter(e => e.key == "Enter" || e.key == " ") --> { e =>
+                e.preventDefault(); Viewer.highlight.update(h => if h.contains(i) then None else Some(i))
+              },
               cls("on") <-- Viewer.highlight.signal.map(_.contains(i)),
               onMouseEnter --> { _ => Viewer.highlight.set(Some(i)) },
               onMouseLeave --> { _ => Viewer.highlight.set(None) },

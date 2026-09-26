@@ -1,15 +1,19 @@
 package atlas
 
+import Catalog.Filter
+
 /** The application's places, kept in the URL fragment so the static site needs no server-side routing: `#`
-  * (the home page), `#sequence`, `#classes` (with `/k=<k>` to open the table on one row), `#lifts` (the
-  * planar lifts, `/k=<k>` for one row), `#stars` and `#star/<species index>` (the vertex stars), `#guide`
-  * (and `#guide/<section>`), `#about`, `#class/<id>` (with `?orbits` to switch the vertex orbits on). The
-  * fragments of the earlier atlas page (`#counts`, `#table`, `#table/k=<k>`) still lead to the same places.
+  * (the home page), `#sequence`, `#classes` (with the table's filter as a query,
+  * `#classes?k=5&world=prism&sort=chambers`, so a filtered list can be linked), `#lifts` (the planar lifts,
+  * `/k=<k>` for one row), `#stars` and `#star/<species index>` (the vertex stars), `#guide` (and
+  * `#guide/<section>`), `#about`, `#class/<id>` (with `?orbits` to switch the vertex orbits on). The
+  * fragments of the earlier atlas page (`#counts`, `#table`, `#table/k=<k>`) and `#classes/k=<k>` still lead
+  * to the same places.
   */
 enum Route:
   case Home
   case Sequence
-  case Classes(k: Option[Int])
+  case Classes(filter: Filter)
   case Lifts(k: Option[Int])
   case Stars
   case Star(index: Int)
@@ -27,8 +31,8 @@ object Route:
     val (path, query) = body.span(_ != '?')
     path.split('/').toList match
       case ("sequence" | "counts") :: Nil                => Sequence
-      case ("classes" | "table") :: Nil                  => Classes(None)
-      case ("classes" | "table") :: KFilter(k) :: Nil    => Classes(Some(k.toInt))
+      case ("classes" | "table") :: Nil                  => Classes(Filter.fromQuery(query))
+      case ("classes" | "table") :: KFilter(k) :: Nil    => Classes(Filter(k = Some(k.toInt)))
       case "lifts" :: Nil                                => Lifts(None)
       case "lifts" :: KFilter(k) :: Nil                  => Lifts(Some(k.toInt))
       case "stars" :: Nil                                => Stars
@@ -44,8 +48,7 @@ object Route:
   def fragment(r: Route): String = r match
     case Home              => "#"
     case Sequence          => "#sequence"
-    case Classes(None)     => "#classes"
-    case Classes(Some(k))  => s"#classes/k=$k"
+    case Classes(f)        => "#classes" + Option(f.toQuery).filter(_.nonEmpty).fold("")("?" + _)
     case Lifts(None)       => "#lifts"
     case Lifts(Some(k))    => s"#lifts/k=$k"
     case Stars             => "#stars"

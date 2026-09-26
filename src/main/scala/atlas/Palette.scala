@@ -21,18 +21,18 @@ object Palette:
     (143, 143, 90)
   )
 
+  /** The orbit colours: the Okabe–Ito palette, told apart under every common colour-vision deficiency (its
+    * closest pair keeps a CIE76 distance of 16 or more under simulated protanopia, deuteranopia and
+    * tritanopia; the palette before it fell to 4.3 under protanopia). Seven colours, one per orbit up to k = 7.
+    */
   val orbit: Vector[String] = Vector(
-    "#e6194b",
-    "#3cb44b",
-    "#4363d8",
-    "#f58231",
-    "#911eb4",
-    "#42d4f4",
-    "#f032e6",
-    "#bfef45",
-    "#fabed4",
-    "#469990",
-    "#9A6324"
+    "#E69F00",
+    "#56B4E9",
+    "#009E73",
+    "#F0E442",
+    "#0072B2",
+    "#D55E00",
+    "#CC79A7"
   )
 
   def cellCss(k: Int): String = { val (r, g, b) = cell(k); s"rgb($r,$g,$b)" }

@@ -247,3 +247,12 @@ footer { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; pad
   .hero h2 { font-size: 1.3rem; }
   svg.chart .bar-value, svg.chart .bar-k { font-size: 18px; }
 }
+
+/* accessibility */
+.skip { position: absolute; left: 8px; top: -40px; z-index: 30; background: var(--accent); color: var(--accent-ink);
+  padding: 6px 10px; border-radius: 6px; }
+.skip:focus { top: 8px; }
+main:focus { outline: none; }
+th button.sort { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+th button.sort:hover { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }

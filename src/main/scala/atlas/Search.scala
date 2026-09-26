@@ -36,9 +36,14 @@ object Search:
     div(
       cls := "search-box",
       input(
-        typ         := "search",
-        placeholder := "search the atlas",
-        aria.label  := "search the atlas: a class id, a name, a species label, a word, a key or a tiling",
+        typ               := "search",
+        placeholder       := "search the atlas",
+        role              := "combobox",
+        aria.autoComplete := "list",
+        aria.controls     := "search-suggestions",
+        aria.expanded <-- text.signal.combineWith(open.signal).map((t, o) => o && hits(t).nonEmpty),
+        aria.activeDescendant <-- selected.signal.map(s => s"search-hit-$s"),
+        aria.label        := "search the atlas: a class id, a name, a species label, a word, a key or a tiling",
         controlled(
           value <-- text.signal,
           onInput.mapToValue --> { t => text.set(t); selected.set(0); open.set(true) }
@@ -60,12 +65,15 @@ object Search:
         val hs = hits(t)
         Option.when(o && hs.nonEmpty)(
           ul(
-            cls  := "suggestions",
-            role := "listbox",
+            cls    := "suggestions",
+            role   := "listbox",
+            idAttr := "search-suggestions",
             hs.zipWithIndex.map((h, j) =>
               li(
-                cls("on") := j == s,
-                role      := "option",
+                cls("on")     := j == s,
+                role          := "option",
+                idAttr        := s"search-hit-$j",
+                aria.selected := j == s,
                 onMouseDown.preventDefault --> { _ => goTo(h) },
                 row(h)
               )

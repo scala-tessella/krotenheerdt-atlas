@@ -28,7 +28,11 @@ object Viewer:
 
   def apply(meta: Meta, patch: ClassPatch): HtmlElement =
     highlight.set(None)
-    val canvas   = canvasTag(cls := "viewer", aria.label := s"the ${patch.cells.length} cells of ${patch.id}")
+    val canvas   = canvasTag(
+      cls        := "viewer",
+      role       := "img",
+      aria.label := s"the ${patch.cells.length} cells of ${patch.id}, turned by dragging"
+    )
     val dragging = Var(false)
     var gesture  = Gesture.State()
     val view     = Prefs.shrink.signal

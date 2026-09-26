@@ -129,3 +129,17 @@ class CatalogSuite extends munit.FunSuite:
   test("the stars come before the weaker class matches"):
     val hits = search(all, species, "cube")
     assertEquals(hits.take(2), Seq(Hit.StarHit(18, "{cube:8}#1"), Hit.StarHit(25, "{cube:4 p3:6}#1")))
+
+  test("a filter travels in the URL: its query string and back"):
+    val f = Filter(
+      k = Some(5),
+      world = Some("cubic family"),
+      source = Some("lift"),
+      text = "{cube:4 p3:6}#1",
+      liftsOnly = true
+    ).sortedBy(Column.Chambers).sortedBy(Column.Chambers)
+    assertEquals(Filter.fromQuery(f.toQuery), f)
+    assertEquals(Filter().toQuery, "")
+    assertEquals(Filter.fromQuery(""), Filter())
+    assertEquals(Filter(k = Some(3)).toQuery, "k=3")
+    assertEquals(Filter.fromQuery("?k=x&sort=nothing&bogus"), Filter())

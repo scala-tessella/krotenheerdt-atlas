@@ -115,7 +115,7 @@ object Home:
           "28, 57, 119, 146, 122, 78, 16, then zero: row by row, with how each count is known."
         ),
         entry(
-          Route.Classes(None),
+          Route.Classes(Catalog.Filter()),
           "Browse the classes",
           s"All $total honeycombs, filtered by k, world and source, or searched."
         ),
