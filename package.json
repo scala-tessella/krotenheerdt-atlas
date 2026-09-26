@@ -1,0 +1,14 @@
+{
+  "name": "krotenheerdt-atlas",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@scala-js/vite-plugin-scalajs": "1.1.0",
+    "vite": "8.3.1"
+  }
+}

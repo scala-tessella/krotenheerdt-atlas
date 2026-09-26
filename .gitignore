@@ -1,0 +1,10 @@
+target/
+project/target/
+project/project/
+.bsp/
+.metals/
+.idea/
+node_modules/
+dist/
+# the data bundle is fetched, never committed (scripts/fetch-data.sh)
+public/data/
