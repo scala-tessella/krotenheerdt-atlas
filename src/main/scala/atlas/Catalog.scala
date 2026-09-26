@@ -78,6 +78,37 @@ object Catalog:
   def choices(classes: Seq[ClassEntry], value: ClassEntry => String): Seq[String] =
     classes.map(value).distinct.sorted
 
+  /** A suggestion of the search box: a class, or a vertex star (by species index and label). */
+  enum Hit:
+    case ClassHit(c: ClassEntry)
+    case StarHit(index: Int, label: String)
+
+  /** The search box's suggestions for a text, best first: the classes whose id is the text, then whose id
+    * starts with it, then whose name contains it, then whose species, word, key or tiling contain it (atlas
+    * order within each rank); then the vertex stars whose label or reading contains it. At most `limit`; none
+    * for a blank text.
+    */
+  def search(classes: Seq[ClassEntry], species: Seq[(Int, String)], text: String, limit: Int = 8): Seq[Hit] =
+    val t = text.trim.toLowerCase
+    if t.isEmpty then Nil
+    else
+      def rank(c: ClassEntry): Option[Int] =
+        if c.id.toLowerCase == t then Some(0)
+        else if c.id.toLowerCase.startsWith(t) then Some(1)
+        else if c.name.toLowerCase.contains(t) then Some(2)
+        else if searchable(c).contains(t) then Some(3)
+        else None
+      val ranked                           = classes.flatMap(c => rank(c).map(r => (r, c))).sortBy(_._1)
+      val strong                           = ranked.filter(_._1 <= 2).map(p => Hit.ClassHit(p._2))
+      val weak                             = ranked.filter(_._1 == 3).map(p => Hit.ClassHit(p._2))
+      val byStar                           = species
+        .filter((_, l) => l.toLowerCase.contains(t) || Species.describe(l).toLowerCase.contains(t))
+        .map((i, l) => Hit.StarHit(i, l))
+      // the stars come after the ids and names and before the weaker matches (species set, word, key, tiling),
+      // and first of all when the text looks like a label
+      val hits                             = if t.startsWith("{") then byStar ++ strong ++ weak else strong ++ byStar ++ weak
+      hits.take(limit)
+
   /** A species set in a canonical order, so sets listed in different orders compare equal. */
   def speciesSet(pair: String): String = pair.split("~").map(_.trim).sorted.mkString(" ~ ")
 

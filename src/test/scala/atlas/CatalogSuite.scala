@@ -111,3 +111,21 @@ class CatalogSuite extends munit.FunSuite:
     assertEquals(ids(rows(all :+ prismatic, Filter(liftsOnly = true))), Seq("k1-020", "k2-001"))
     assertEquals(activeFilters(Filter(liftsOnly = true)), 1)
     assertEquals(ids(rows(all, Filter(text = "4.6.12"))), Seq("k2-001"))
+
+  private val species = Seq(18 -> "{cube:8}#1", 25 -> "{cube:4 p3:6}#1")
+
+  test("the search ranks an exact id, then id prefixes, then names, then the rest"):
+    def hitIds(t: String) = search(all, species, t).collect { case Hit.ClassHit(c) => c.id }
+    assertEquals(hitIds("k2-002"), Seq("k2-002"))
+    assertEquals(hitIds("k2"), Seq("k2-001", "k2-002", "k2-003"))
+    assertEquals(hitIds("new"), Seq("k2-002", "k3-001"))
+    assertEquals(hitIds("   "), Nil)
+    assertEquals(search(all, species, "k", limit = 2).size, 2)
+
+  test("the search finds the vertex stars by label or reading, first when the text is a label"):
+    assertEquals(search(all, species, "cubes").collect { case h: Hit.StarHit => h.index }, Seq(18, 25))
+    assertEquals(search(all, species, "{cube:4").headOption, Some(Hit.StarHit(25, "{cube:4 p3:6}#1")))
+
+  test("the stars come before the weaker class matches"):
+    val hits = search(all, species, "cube")
+    assertEquals(hits.take(2), Seq(Hit.StarHit(18, "{cube:8}#1"), Hit.StarHit(25, "{cube:4 p3:6}#1")))

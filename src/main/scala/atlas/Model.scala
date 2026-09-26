@@ -102,6 +102,14 @@ object Model:
     /** One SVG path per polygon size (the key: the number of sides). */
     val paths: js.Dictionary[String] = js.native
 
+  /** `stars.json`: the vertex star of a species, cut from a class drawing it, centred on its vertex. */
+  @js.native
+  trait StarDrawing extends js.Object:
+    val label: String         = js.native
+    @js.annotation.JSName("from")
+    val source: String        = js.native
+    val cells: js.Array[Cell] = js.native
+
   /** Whether a class is a prismatic lift. */
   def isLift(c: ClassEntry): Boolean = c.lift.getOrElse(false)
 

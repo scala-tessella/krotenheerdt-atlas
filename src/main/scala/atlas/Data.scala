@@ -28,6 +28,9 @@ object Data:
   /** The planar tilings of the lifts, fetched once (for the gallery and the lift pages). */
   lazy val tilings: Future[js.Dictionary[TilingDrawing]] = json[js.Dictionary[TilingDrawing]]("tilings.json")
 
+  /** The vertex stars of the species, by species index, fetched once. */
+  lazy val stars: Future[js.Dictionary[StarDrawing]] = json[js.Dictionary[StarDrawing]]("stars.json")
+
   private val patches = collection.mutable.Map.empty[String, Future[ClassPatch]]
 
   /** The patch of a class, fetched once. */

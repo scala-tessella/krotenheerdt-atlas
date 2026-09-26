@@ -8,6 +8,9 @@ class RouteSuite extends munit.FunSuite:
     assertEquals(Route.parse("#classes/k=5"), Route.Classes(Some(5)))
     assertEquals(Route.parse("#lifts"), Route.Lifts(None))
     assertEquals(Route.parse("#lifts/k=3"), Route.Lifts(Some(3)))
+    assertEquals(Route.parse("#stars"), Route.Stars)
+    assertEquals(Route.parse("#star/25"), Route.Star(25))
+    assertEquals(Route.parse("#star/x"), Route.Sequence)
     assertEquals(Route.parse("#class/k3-040"), Route.Class("k3-040", orbits = false))
     assertEquals(Route.parse("#class/k3-040?orbits"), Route.Class("k3-040", orbits = true))
 
@@ -30,6 +33,8 @@ class RouteSuite extends munit.FunSuite:
                Route.Classes(Some(7)),
                Route.Lifts(None),
                Route.Lifts(Some(2)),
+               Route.Stars,
+               Route.Star(31),
                Route.Class("k7-011", false),
                Route.Class("k7-011", true)
              )

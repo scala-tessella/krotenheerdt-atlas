@@ -43,7 +43,14 @@ object Main:
           a(
             href := Route.fragment(Route.Lifts(None)),
             cls("on") <-- route.signal.map { case Route.Lifts(_) => true; case _ => false },
-            "Planar lifts"
+            span(cls := "long", "Planar lifts"),
+            span(cls := "short", "Lifts")
+          ),
+          a(
+            href := Route.fragment(Route.Stars),
+            cls("on") <-- route.signal.map { case Route.Stars | Route.Star(_) => true; case _ => false },
+            span(cls := "long", "Vertex stars"),
+            span(cls := "short", "Stars")
           ),
           child.maybe <-- route.signal.map {
             case r: Route.Class => Some(a(href := Route.fragment(r), cls := "on", "Class"))
@@ -51,6 +58,7 @@ object Main:
           }
         ),
         span(cls := "spacer"),
+        child.maybe <-- index.map(_.map(Search.box)),
         span(
           cls    := "note total",
           child.text <-- index.map(_.fold("")(i =>
@@ -63,6 +71,8 @@ object Main:
           case (None, _)                          => p(cls := "note", "loading the atlas…")
           case (Some(i), Route.Sequence)          => sequenceView(i)
           case (Some(i), Route.Lifts(k))          => Lifts.view(i, k)
+          case (Some(i), Route.Stars)             => Stars.view(i)
+          case (Some(i), Route.Star(n))           => Stars.page(i, n)
           case (Some(i), Route.Classes(k))        =>
             k.foreach(k => filter.update(_.copy(k = Some(k))))
             classesView(i)
@@ -297,13 +307,30 @@ object Main:
   private def row(title: String, value: Modifier[HtmlElement]*): Seq[HtmlElement] = Seq(dt(title), dd(value*))
 
   /** The class's description list: what is known of it, each line only when there is something to show. */
-  def details(c: ClassEntry, same: Seq[ClassEntry], link: ClassEntry => HtmlElement): Seq[HtmlElement] =
+  def details(
+      c: ClassEntry,
+      same: Seq[ClassEntry],
+      link: ClassEntry => HtmlElement,
+      starIndex: String => Option[Int]
+  ): Seq[HtmlElement] =
+    // each vertex star of the set links to its page
+    val labels                    = c.pair.split("~").toSeq.map(_.trim).filter(_.nonEmpty)
     val species: Seq[HtmlElement] =
       if c.pair.isEmpty then Nil
       else
         row(
           "species",
-          span(cls := "mono", c.pair),
+          span(
+            cls := "mono",
+            labels.flatMap(l =>
+              Seq(
+                starIndex(l).fold[Node](span(l))(n =>
+                  a(href := Route.fragment(Route.Star(n)), title := Species.describe(l), l)
+                ),
+                span(" ~ ")
+              )
+            ).dropRight(1)
+          ),
           if c.species.isEmpty then emptyNode else span(cls := "note", s" indices ${c.species.mkString(":")}")
         )
     Seq(
@@ -346,14 +373,15 @@ object Main:
         cls  := "classpage",
         div(
           cls := "side",
-          div(cls := "card", dl(details(c, same, link))),
+          div(cls := "card", dl(details(c, same, link, Stars.indexOf(i, _)))),
           Lifts.onClassPage(c),
           Option(c.word).filter(_.nonEmpty).flatMap(ClassParts.wordStrip),
           ClassParts.foundCard(c)
         ),
         child <-- patch.map {
           case None     => div(cls := "main-col", div(cls := "card", p(cls := "note", "loading the patch…")))
-          case Some(pt) => div(cls := "main-col", Viewer(i.meta, pt), ClassParts.orbitsCard(pt))
+          case Some(pt) =>
+            div(cls := "main-col", Viewer(i.meta, pt), ClassParts.orbitsCard(pt, Stars.indexOf(i, _)))
         }
       )
     )

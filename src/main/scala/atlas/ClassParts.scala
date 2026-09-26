@@ -25,7 +25,7 @@ object ClassParts:
     )
 
   /** The vertex orbits: one row each, hovered (or tapped) to show its vertices alone in the viewer. */
-  def orbitsCard(patch: ClassPatch): Option[HtmlElement] =
+  def orbitsCard(patch: ClassPatch, starIndex: String => Option[Int]): Option[HtmlElement] =
     Option.when(patch.orbits.nonEmpty)(
       div(
         cls := "card orbits-card",
@@ -51,7 +51,15 @@ object ClassParts:
                 cls := "orbit-text",
                 div(span(cls := "sw dot", backgroundColor := Palette.orbitCss(i)), s"orbit ${i + 1}"),
                 div(cls := "orbit-words", Species.describe(label)),
-                div(cls := "mono orbit-label", label)
+                div(cls := "mono orbit-label", label),
+                starIndex(label).map(n =>
+                  a(
+                    cls  := "orbit-link",
+                    href := Route.fragment(Route.Star(n)),
+                    onClick.stopPropagation --> { _ => () },
+                    "every class with this star"
+                  )
+                )
               )
             )
           )
