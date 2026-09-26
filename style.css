@@ -109,7 +109,7 @@ canvas.viewer:active { cursor: grabbing; }
   .card { padding: 12px; }
   .classpage { grid-template-columns: minmax(0, 1fr); }
   .class-title { font-size: 1.1rem; }
-  .classpage > .viewer-card { order: -1; }
+  .classpage > .main-col { order: -1; }
   canvas.viewer { height: min(62vh, 110vw); }
   .controls input[type=range] { width: 110px; }
   .filters-toggle { display: inline-block; }
@@ -158,3 +158,21 @@ canvas.viewer:active { cursor: grabbing; }
   .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .seq .composition { display: none; }
 }
+
+/* the class page's parts */
+.summary { font-family: var(--serif); font-size: 1.02rem; margin: -6px 0 14px; max-width: 60em; color: var(--ink); }
+.main-col { display: grid; gap: var(--gap); min-width: 0; }
+.orbit-rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; margin-top: 8px; }
+.orbit-row { display: flex; gap: 10px; align-items: center; padding: 6px; border: 1px solid var(--line);
+  border-radius: 6px; cursor: pointer; min-width: 0; }
+.orbit-row:hover, .orbit-row.on { border-color: var(--accent); background: var(--soft); }
+canvas.star { width: 84px; height: 84px; flex: none; background: var(--canvas); border-radius: 4px; }
+.orbit-text { min-width: 0; font-size: .85rem; }
+.orbit-words { margin: 2px 0; }
+.orbit-label { color: var(--muted); font-size: .75rem; word-break: break-word; }
+.found-card p { margin: 6px 0; font-size: .9rem; }
+details summary { cursor: pointer; color: var(--accent); font-size: .85rem; }
+details p { font-size: .78rem; color: var(--muted); word-break: break-word; }
+svg.word-strip { width: 100%; height: auto; display: block; margin: 6px 0; }
+.word-token { font-family: var(--mono); font-size: 9px; fill: var(--ink); }
+.word-dir { font-family: var(--mono); font-size: 9px; fill: #fff; }

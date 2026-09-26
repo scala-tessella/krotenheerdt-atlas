@@ -314,12 +314,6 @@ object Main:
       chambersOf(c).fold(Nil)(n => row("chambers", s"$n (minimal Delaney–Dress symbol)")),
       if c.key.isEmpty then Nil else row("key", span(cls := "mono", c.key)),
       if c.word.isEmpty then Nil else row("stacking word", span(cls := "mono", c.word)),
-      c.dossier.toOption.fold(Nil)(d =>
-        row(
-          "dossier",
-          s"valid ${d.valid}, minimal ${d.minimal}, species distinct ${d.distinct}; folding tuple: ${d.tuple}"
-        )
-      ),
       c.net.toOption.filter(_.nonEmpty).fold(Nil)(n =>
         row("net", n, span(cls := "note", " (preliminary identification)"))
       ),
@@ -347,16 +341,19 @@ object Main:
         span(s"${classes.size} classes; arrows switch")
       ),
       h2(cls := "class-title", span(cls := "mono id", c.id), " ", c.name),
+      p(cls  := "summary", Describe.summary(c).capitalize + "."),
       div(
         cls  := "classpage",
         div(
           cls := "side",
           div(cls := "card", dl(details(c, same, link))),
-          Lifts.onClassPage(c)
+          Lifts.onClassPage(c),
+          Option(c.word).filter(_.nonEmpty).flatMap(ClassParts.wordStrip),
+          ClassParts.foundCard(c)
         ),
         child <-- patch.map {
-          case None     => div(cls := "card", p(cls := "note", "loading the patch…"))
-          case Some(pt) => Viewer(i.meta, pt)
+          case None     => div(cls := "main-col", div(cls := "card", p(cls := "note", "loading the patch…")))
+          case Some(pt) => div(cls := "main-col", Viewer(i.meta, pt), ClassParts.orbitsCard(pt))
         }
       )
     )

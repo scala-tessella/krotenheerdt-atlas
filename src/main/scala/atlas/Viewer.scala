@@ -8,9 +8,10 @@ import Model.*
 /** The patch viewer: the cells of a class on a canvas (the scene of [[Scene]], painted farthest first),
   * turned by dragging, zoomed by pinching or the wheel, reset by a double tap or click ([[Gesture]]), with
   * the cell legend (full names on hover), the shrink and height sliders, the vertex orbits switch and the
-  * orbit legend. While a gesture is in progress the drawing is lighter (no outlines, no vertex spheres) and
-  * it is repainted at most once per animation frame, sharp on dense screens. The angles and the zoom are kept
-  * for the visit, so the next class opens seen from the same side; the settings are the remembered [[Prefs]].
+  * orbit highlighted from the orbits card ([[highlight]]). While a gesture is in progress the drawing is
+  * lighter (no outlines, no vertex spheres) and it is repainted at most once per animation frame, sharp on
+  * dense screens. The angles and the zoom are kept for the visit, so the next class opens seen from the same
+  * side; the settings are the remembered [[Prefs]].
   */
 object Viewer:
 
@@ -19,16 +20,27 @@ object Viewer:
   private val el   = Var(home._2)
   private val zoom = Var(home._3)
 
+  /** The vertex orbit whose spheres the viewer shows alone (the orbit row under the pointer or tapped). */
+  val highlight: Var[Option[Int]] = Var(None)
+
   private def reset(): Unit =
     az.set(home._1); el.set(home._2); zoom.set(home._3)
 
   def apply(meta: Meta, patch: ClassPatch): HtmlElement =
+    highlight.set(None)
     val canvas   = canvasTag(cls := "viewer", aria.label := s"the ${patch.cells.length} cells of ${patch.id}")
     val dragging = Var(false)
     var gesture  = Gesture.State()
     val view     = Prefs.shrink.signal
-      .combineWith(Prefs.cut.signal, Prefs.orbits.signal, az.signal, el.signal, dragging.signal)
-      .map((s, c, o, a, e, d) => (Scene.View(a, e, s / 100.0, c / 1000.0, o && !d), d))
+      .combineWith(
+        Prefs.cut.signal,
+        Prefs.orbits.signal,
+        az.signal,
+        el.signal,
+        dragging.signal,
+        highlight.signal
+      )
+      .map((s, c, o, a, e, d, h) => (Scene.View(a, e, s / 100.0, c / 1000.0, o && !d, h.filter(_ => !d)), d))
     val frame    = view.map((v, d) => (Scene.items(patch.cells, v), d)).combineWith(zoom.signal)
 
     // the latest frame, painted on the next animation frame (several changes in one frame paint once)
@@ -109,21 +121,6 @@ object Viewer:
       p(
         cls   := "hint",
         s"${patch.cells.length} cells · drag to turn · pinch or wheel to zoom · double-tap to reset"
-      ),
-      div(
-        cls   := "orbit-legend",
-        children <-- Prefs.orbits.signal.map { on =>
-          if !on then Nil
-          else if patch.orbits.isEmpty then List(span("no orbit data for this patch"))
-          else
-            patch.orbits.toList.zipWithIndex.map((label, i) =>
-              span(
-                span(cls := "sw dot", backgroundColor := Palette.orbitCss(i)),
-                s"orbit ${i + 1} ",
-                span(cls := "mono", label)
-              )
-            )
-        }
       )
     )
 

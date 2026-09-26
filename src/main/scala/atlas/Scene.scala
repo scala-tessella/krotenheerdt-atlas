@@ -14,7 +14,14 @@ object Scene:
   /** The view: azimuth and elevation of the eye (radians), the shrink (0–1), the height cut (0–1 of the
     * patch's height) and whether the vertex orbits are shown.
     */
-  final case class View(az: Double, el: Double, shrink: Double, cut: Double, orbits: Boolean)
+  final case class View(
+      az: Double,
+      el: Double,
+      shrink: Double,
+      cut: Double,
+      orbits: Boolean,
+      highlight: Option[Int] = None
+  )
 
   sealed trait Item:
     def depth: Double
@@ -69,14 +76,30 @@ object Scene:
         if dot(n, eye) > 0 then
           val lum = 0.55 + 0.45 * math.max(0, dot(n, light))
           out += Face(dot(fc, eye), p.map(onScreen).toVector, Palette.shaded(c.k, lum))
-    if view.orbits then
+    // the spheres: every orbit with the orbits on; one orbit alone, orbits on or off, while it is highlighted
+    if view.orbits || view.highlight.isDefined then
       val seen = collection.mutable.Set.empty[(Long, Long, Long)]
       for (c, ci) <- cells.toSeq.zipWithIndex if zs(ci) <= zcut && c.o.length == c.v.length do
-        for (v, vi) <- c.v.toSeq.zipWithIndex if c.o(vi) >= 0 do
+        for (v, vi) <- c.v.toSeq.zipWithIndex if c.o(vi) >= 0 && view.highlight.forall(_ == c.o(vi)) do
           val p   = point(v)
           val key = (math.round(p._1 * 100), math.round(p._2 * 100), math.round(p._3 * 100))
           if seen.add(key) then out += Dot(dot(p, eye) + 0.01, onScreen(p), Palette.orbitCss(c.o(vi)))
     out.result().sortBy(_.depth)
+
+  /** The vertex star of an orbit: the cells around the vertex of that orbit nearest the patch's centre (the
+    * most central vertex has its whole star in the patch); empty if no vertex carries the orbit.
+    */
+  def starOf(cells: js.Array[Cell], orbit: Int): js.Array[Cell] =
+    val all        = cells.toSeq
+    val centre     = mean(all.flatMap(_.v.toSeq.map(point)))
+    def key(p: V3) = (math.round(p._1 * 100), math.round(p._2 * 100), math.round(p._3 * 100))
+    val ofOrbit    =
+      for c <- all if c.o.length == c.v.length; (v, vi) <- c.v.toSeq.zipWithIndex if c.o(vi) == orbit
+      yield point(v)
+    if ofOrbit.isEmpty then js.Array()
+    else
+      val at = ofOrbit.minBy(p => dot(sub(p, centre), sub(p, centre)))
+      js.Array(all.filter(_.v.toSeq.exists(v => key(point(v)) == key(at)))*)
 
   /** The bounding box of the projected items on the view plane: (x0, x1, y0, y1). */
   def bounds(items: Vector[Item]): (Double, Double, Double, Double) =

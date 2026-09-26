@@ -67,3 +67,13 @@ class SceneSuite extends munit.FunSuite:
   test("the items come farthest first"):
     val is = Scene.items(two, Scene.View(0.7, 0.4, 0.8, 1.0, orbits = true))
     assertEquals(is.map(_.depth), is.map(_.depth).sorted)
+
+  test("a highlighted orbit shows its spheres alone, even with the orbits off"):
+    val is = Scene.items(two, Scene.View(0.7, 0.4, 0.8, 1.0, orbits = false, highlight = Some(1)))
+    assertEquals(dots(is).size, 4) // the top four vertices of the upper cube carry orbit 1
+    assertEquals(dots(is).map(_.color).distinct, Seq(Palette.orbitCss(1)))
+
+  test("the star of an orbit: the cells around its most central vertex"):
+    assertEquals(Scene.starOf(two, 0).length, 2) // a middle vertex, in both cubes
+    assertEquals(Scene.starOf(two, 1).length, 1) // a top vertex, in the upper cube only
+    assertEquals(Scene.starOf(two, 5).length, 0)
