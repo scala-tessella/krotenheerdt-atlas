@@ -25,6 +25,9 @@ object Data:
 
   lazy val index: Future[AtlasIndex] = json[AtlasIndex]("index.json")
 
+  /** The planar tilings of the lifts, fetched once (for the gallery and the lift pages). */
+  lazy val tilings: Future[js.Dictionary[TilingDrawing]] = json[js.Dictionary[TilingDrawing]]("tilings.json")
+
   private val patches = collection.mutable.Map.empty[String, Future[ClassPatch]]
 
   /** The patch of a class, fetched once. */

@@ -16,7 +16,9 @@ class CatalogSuite extends munit.FunSuite:
       pair: String,
       chambers: js.Any,
       word: String = "",
-      species: Seq[Int] = Nil
+      species: Seq[Int] = Nil,
+      lift: Boolean = false,
+      tiling: String = ""
   ): ClassEntry =
     js.Dynamic
       .literal(
@@ -30,12 +32,26 @@ class CatalogSuite extends munit.FunSuite:
         word = word,
         key = "",
         species = js.Array(species*),
-        cells = js.Array[String]()
+        cells = js.Array[String](),
+        lift = lift,
+        tiling = tiling
       )
       .asInstanceOf[ClassEntry]
 
   private val cubic = entry("k1-004", 1, "cubic", "uniform", "prism", "", null)
-  private val a     = entry("k2-001", 2, "lift A", "lift", "prism", "{x}#1 ~ {y}#2", 30, species = Seq(16, 21))
+  private val a     =
+    entry(
+      "k2-001",
+      2,
+      "lift A",
+      "lift",
+      "prism",
+      "{x}#1 ~ {y}#2",
+      30,
+      species = Seq(16, 21),
+      lift = true,
+      tiling = "3.4.6.4; 4.6.12"
+    )
   private val b     = entry("k2-002", 2, "NEW #1", "census", "slab", "{y}#2 ~ {x}#1", 20, "C Tu Tw")
   private val c     = entry("k2-003", 2, "slab C", "slab", "slab", "{z}#1 ~ {x}#1", 44)
   private val d     = entry("k3-001", 3, "NEW #2", "census", "prism", "{x}#1 ~ {y}#2 ~ {z}#1", 36)
@@ -79,3 +95,19 @@ class CatalogSuite extends munit.FunSuite:
       activeFilters(Filter(world = Some("slab"), source = Some("lift"), text = "cube").sortedBy(Column.K)),
       3
     )
+
+  test("the planar lifts only: the lifts of every k, with the uniform prismatic ones"):
+    val prismatic = entry(
+      "k1-020",
+      1,
+      "triangular prismatic",
+      "uniform",
+      "prism",
+      "",
+      null,
+      lift = true,
+      tiling = "3.3.3.3.3.3"
+    )
+    assertEquals(ids(rows(all :+ prismatic, Filter(liftsOnly = true))), Seq("k1-020", "k2-001"))
+    assertEquals(activeFilters(Filter(liftsOnly = true)), 1)
+    assertEquals(ids(rows(all, Filter(text = "4.6.12"))), Seq("k2-001"))

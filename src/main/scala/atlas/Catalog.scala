@@ -23,6 +23,7 @@ object Catalog:
       world: Option[String] = None,
       source: Option[String] = None,
       text: String = "",
+      liftsOnly: Boolean = false,
       sort: Column = Column.Id,
       ascending: Boolean = true
   ):
@@ -34,7 +35,14 @@ object Catalog:
     * species indices.
     */
   def searchable(c: ClassEntry): String =
-    Seq(c.name, c.pair, c.word, c.key, c.species.mkString(":")).mkString(" ").toLowerCase
+    Seq(
+      c.name,
+      c.pair,
+      c.word,
+      c.key,
+      c.species.mkString(":"),
+      tilingOf(c).getOrElse("")
+    ).mkString(" ").toLowerCase
 
   private def ordering(col: Column): Ordering[ClassEntry] = col match
     case Column.Id       => Ordering.by(_.id)
@@ -51,14 +59,20 @@ object Catalog:
     val text = f.text.trim.toLowerCase
     val kept = classes.filter(c =>
       f.k.forall(_ == c.k) && f.world.forall(_ == c.world) && f.source.forall(_ == c.cat) &&
-        (text.isEmpty || searchable(c).contains(text))
+        (!f.liftsOnly || isLift(c)) && (text.isEmpty || searchable(c).contains(text))
     )
     val ord  = ordering(f.sort)
     kept.sorted(using if f.ascending then ord else ord.reverse)
 
   /** How many filters are set (the sort is not a filter). */
   def activeFilters(f: Filter): Int =
-    Seq(f.k.isDefined, f.world.isDefined, f.source.isDefined, f.text.trim.nonEmpty).count(identity)
+    Seq(
+      f.k.isDefined,
+      f.world.isDefined,
+      f.source.isDefined,
+      f.text.trim.nonEmpty,
+      f.liftsOnly
+    ).count(identity)
 
   /** The distinct values of a column over the classes, sorted, for its filter's choices. */
   def choices(classes: Seq[ClassEntry], value: ClassEntry => String): Seq[String] =

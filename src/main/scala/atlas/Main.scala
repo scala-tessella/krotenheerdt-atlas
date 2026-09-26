@@ -40,6 +40,11 @@ object Main:
             cls("on") <-- route.signal.map { case Route.Classes(_) => true; case _ => false },
             "Classes"
           ),
+          a(
+            href := Route.fragment(Route.Lifts(None)),
+            cls("on") <-- route.signal.map { case Route.Lifts(_) => true; case _ => false },
+            "Planar lifts"
+          ),
           child.maybe <-- route.signal.map {
             case r: Route.Class => Some(a(href := Route.fragment(r), cls := "on", "Class"))
             case _              => None
@@ -57,6 +62,7 @@ object Main:
         child <-- index.combineWith(route.signal).map {
           case (None, _)                          => p(cls := "note", "loading the atlas…")
           case (Some(i), Route.Sequence)          => sequenceView(i)
+          case (Some(i), Route.Lifts(k))          => Lifts.view(i, k)
           case (Some(i), Route.Classes(k))        =>
             k.foreach(k => filter.update(_.copy(k = Some(k))))
             classesView(i)
@@ -83,11 +89,26 @@ object Main:
         "tiling; the planar numbers are 11, 20, 39, 33, 15, 10, 7 and then 0. The three-dimensional sequence reads ",
         "28, 57, 119, 146, 122, 78, 16 and vanishes from k = 8 on, at the same point as the planar one."
       ),
+      p(
+        cls := "prose",
+        "Every planar Krötenheerdt tiling is here too: stacked into prisms it becomes a honeycomb of the atlas, its ",
+        "prismatic lift. The planar sequence sits inside the spatial one, row by row — ",
+        a(href := Route.fragment(Route.Lifts(None)), "browse the planar lifts"),
+        "."
+      ),
       div(
         cls := "table-wrap",
         table(
           cls := "seq",
-          thead(tr(th("k"), th("N", sub("k")), th("status"), th("composition"), th("atlas"))),
+          thead(
+            tr(
+              th("k"),
+              th("N", sub("k")),
+              th(title := "the planar Krötenheerdt tilings, lifted among the N_k", "planar"),
+              th("status"),
+              th(cls   := "composition", "composition")
+            )
+          ),
           tbody(
             i.sequence.toSeq.sortBy(_.k).map { r =>
               val listed = classes.count(_.k == r.k)
@@ -102,12 +123,18 @@ object Main:
                       r.n
                     )
                 ),
-                td(cls := s"status-${r.status}", r.status),
-                td(r.note),
                 td(
-                  if listed == 0 then ""
-                  else a(href := Route.fragment(Route.Classes(Some(r.k))), s"$listed in the atlas")
-                )
+                  r.planar.toOption.filter(_ > 0).fold[Modifier[HtmlElement]](r.planar.getOrElse(0).toString)(
+                    n =>
+                      a(
+                        href       := Route.fragment(Route.Lifts(Some(r.k))),
+                        aria.label := s"the $n planar lifts of k = ${r.k}",
+                        n
+                      )
+                  )
+                ),
+                td(cls := s"status-${r.status}", r.status),
+                td(cls := "composition", r.note)
               )
             }
           )
@@ -165,6 +192,17 @@ object Main:
             onInput.mapToValue --> { t => filter.update(_.copy(text = t)) }
           )
         )
+      ),
+      label(
+        cls      := "check",
+        input(
+          typ := "checkbox",
+          controlled(
+            checked <-- filter.signal.map(_.liftsOnly),
+            onClick.mapToChecked --> { b => filter.update(_.copy(liftsOnly = b)) }
+          )
+        ),
+        "planar lifts only"
       ),
       button(cls := "quiet", onClick --> { _ => filter.set(Filter()) }, "clear")
     )
@@ -312,8 +350,9 @@ object Main:
       div(
         cls  := "classpage",
         div(
-          cls := "card",
-          dl(details(c, same, link))
+          cls := "side",
+          div(cls := "card", dl(details(c, same, link))),
+          Lifts.onClassPage(c)
         ),
         child <-- patch.map {
           case None     => div(cls := "card", p(cls := "note", "loading the patch…"))

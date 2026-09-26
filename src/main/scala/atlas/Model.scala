@@ -34,6 +34,9 @@ object Model:
     val status: String = js.native
     val note: String   = js.native
 
+    /** The planar Krötenheerdt tilings with k vertex types (their lifts are among the N_k classes). */
+    val planar: js.UndefOr[Int] = js.native
+
   /** A class as the index lists it. */
   @js.native
   trait ClassEntry extends js.Object:
@@ -57,6 +60,12 @@ object Model:
 
     /** The checks of a class found by the stacking enumeration, absent for the others. */
     val dossier: js.UndefOr[Dossier] = js.native
+
+    /** Whether the class is a prismatic lift of a planar tiling (the planar tiling times a line). */
+    val lift: js.UndefOr[Boolean] = js.native
+
+    /** The vertex types of the planar tiling a lift lifts, when a key identifies it. */
+    val tiling: js.UndefOr[String] = js.native
 
   /** The checks recorded for a class found by the stacking enumeration. */
   @js.native
@@ -83,6 +92,21 @@ object Model:
     val v: js.Array[js.Array[Double]] = js.native
     val f: js.Array[js.Array[Int]]    = js.native
     val o: js.Array[Int]              = js.native
+
+  /** `tilings.json`: the drawing of a lift's planar tiling, by class id. */
+  @js.native
+  trait TilingDrawing extends js.Object:
+    /** The drawing's box: x, y, width, height (y downwards, as in SVG). */
+    val box: js.Array[Double] = js.native
+
+    /** One SVG path per polygon size (the key: the number of sides). */
+    val paths: js.Dictionary[String] = js.native
+
+  /** Whether a class is a prismatic lift. */
+  def isLift(c: ClassEntry): Boolean = c.lift.getOrElse(false)
+
+  /** The planar tiling of a lift, when identified. */
+  def tilingOf(c: ClassEntry): Option[String] = c.tiling.toOption.filter(_.nonEmpty)
 
   /** The chambers of a class, if known. */
   def chambersOf(c: ClassEntry): Option[Int] = Option(c.chambers).map(_.asInstanceOf[Int])
