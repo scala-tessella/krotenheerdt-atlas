@@ -91,6 +91,9 @@ object Home:
 
   def view(i: AtlasIndex): HtmlElement =
     val total = i.classes.length
+    // the nonzero rows as the data bundle gives them, so the tile never quotes a stale sequence
+    val rows  = i.sequence.toSeq.sortBy(_.k)
+    val lead  = rows.takeWhile(_.n > 0).map(_.n).mkString(", ")
     div(
       cls := "home",
       div(
@@ -120,7 +123,7 @@ object Home:
         entry(
           Route.Sequence,
           "The sequence",
-          "28, 57, 119, 146, 122, 78, 16, then zero: row by row, with how each count is known."
+          s"$lead, then zero: row by row, with how each count is known."
         ),
         entry(
           Route.Classes(Catalog.Filter()),
