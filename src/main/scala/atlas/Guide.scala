@@ -59,7 +59,7 @@ object Guide:
           ),
           p(
             "In the plane Krötenheerdt found 11, 20, 39, 33, 15, 10, 7 tilings for k = 1 to 7 and none beyond. ",
-            "In space the sequence reads 28, 57, 119, 146, 122, 78, 16 and vanishes from k = 8 on — ",
+            "In space the sequence reads 28, 57, 119, 146, 122, 78, 18, 2 and is zero from k = 11 on, with k = 9 and 10 being enumerated — ",
             to(Route.Sequence, "the sequence"),
             "."
           )
@@ -226,21 +226,23 @@ object Guide:
     ),
     Section(
       "vanishing",
-      "Why the sequence stops at 8",
+      "Where the sequence stops",
       () =>
         Seq(
           p(
-            "From k = 8 on the planar sequence is zero, so only two-direction stackings could remain, and a ",
+            "From k = 8 on the planar sequence is zero, so only two-direction stackings can remain, and a ",
             "stacking word is built of cubes, triangular and hexagonal prisms only. The stars that can meet at a ",
-            "junction of two layers number eleven. Carrying all eleven would need a plain level (cubes on cubes) ",
-            "and a hexagon row of period other than 2, and a plain level forces every period to be 2: no word has ",
+            "junction of two layers number eleven. Carrying all eleven would need cubes on cubes, a plain level, ",
+            "and six hexagonal prisms at a vertex. A plain level rules out hexagon rows of period 3, and with ",
+            "periods 2 and 4 alone six hexagonal prisms never meet at a vertex of a Krötenheerdt word: no word has ",
             "eleven or more species."
           ),
           p(
-            "For k = 8, 9 and 10 the exact enumeration of words finds none. So N",
+            "At k = 8 the exact enumeration of words finds two, both with cubes on cubes and hexagon rows of ",
+            "period 4, so the spatial sequence outlives the planar one. The enumerations of k = 9 and 10 are ",
+            "running; N",
             sub("k"),
-            " = 0 from k = 8 on — at the same point as the planar sequence, though the two sequences are nowhere ",
-            "equal before it."
+            " = 0 from k = 11 on."
           )
         )
     ),

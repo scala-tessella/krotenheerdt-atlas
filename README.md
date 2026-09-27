@@ -1,7 +1,7 @@
 # The atlas of the Krötenheerdt honeycombs
 
 A web application for the k-uniform Krötenheerdt honeycombs of Euclidean 3-space: the sequence N_k, the table of
-every class for k = 1 to 7, and a page per class with its solid cells and vertex orbits. Scala 3 with Scala.js and
+every class for k = 1 to 8, and a page per class with its solid cells and vertex orbits. Scala 3 with Scala.js and
 Laminar, built with Vite, served as a static site at [atlas.tessell.art](https://atlas.tessell.art).
 
 ## Data

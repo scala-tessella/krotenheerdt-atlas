@@ -39,7 +39,7 @@ object About:
           li(
             "M. Càllisto, ",
             em("The three-dimensional Krötenheerdt sequence and its vanishing point"),
-            ", in preparation. The rows k = 2 to 7 and the vanishing from k = 8 on."
+            ", in preparation. The rows k = 2 to 8 and the vanishing of the sequence."
           ),
           li(
             "O. Krötenheerdt, Die homogenen Mosaike n-ter Ordnung in der euklidischen Ebene I–III, ",

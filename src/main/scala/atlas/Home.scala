@@ -55,7 +55,7 @@ object Home:
             svg.cls        := "bar-value",
             r.n.toString
           ),
-          // the planar value on its own bar, zero included: at k = 8 both sequences show their 0
+          // the planar value on its own bar, zero included: from k = 8 the planar sequence shows its 0
           svg.text(
             svg.x          := (x + slot * 0.56).toString,
             svg.y          := (base - height(planar) - 5).toString,
@@ -100,7 +100,7 @@ object Home:
           cls := "prose",
           "Fill space with cubes, prisms, tetrahedra, octahedra and the other convex uniform polyhedra, face to face, so that the ",
           "vertices fall into exactly k kinds and each kind has its own arrangement of cells around it. For each k ",
-          "there are finitely many such honeycombs, and none at all from k = 8 on. This atlas shows every one of ",
+          "there are finitely many such honeycombs: two at k = 8, where the planar sequence has already vanished, and none at all from k = 11 on. This atlas shows every one of ",
           s"them — $total honeycombs — to turn in 3D, compare, and read."
         ),
         chart(i),
