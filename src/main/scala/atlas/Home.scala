@@ -103,7 +103,7 @@ object Home:
           cls := "prose",
           "Fill space with cubes, prisms, tetrahedra, octahedra and the other convex uniform polyhedra, face to face, so that the ",
           "vertices fall into exactly k kinds and each kind has its own arrangement of cells around it. For each k ",
-          "there are finitely many such honeycombs: two at k = 8, where the planar sequence has already vanished, and none at all from k = 11 on. This atlas shows every one of ",
+          "there are finitely many such honeycombs: two at k = 8, where the planar sequence has already vanished, and none at all from k = 9 on. This atlas shows every one of ",
           s"them — $total honeycombs — to turn in 3D, compare, and read."
         ),
         chart(i),

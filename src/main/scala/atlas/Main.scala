@@ -122,7 +122,7 @@ object Main:
         "k vertex orbits carrying k pairwise distinct vertex stars. For k ≥ 5 every such honeycomb is a ",
         "two-direction stacking of cube layers and prism rows, or the prismatic lift of a planar Krötenheerdt ",
         "tiling; the planar numbers are 11, 20, 39, 33, 15, 10, 7 and then 0. The three-dimensional sequence reads ",
-        "28, 57, 119, 146, 122, 78, 18, 2 and is zero from k = 11 on; the rows k = 9 and 10 are being enumerated."
+        "28, 57, 119, 146, 122, 78, 18, 2 and vanishes from k = 9 on, one row after the planar one."
       ),
       p(
         cls := "prose",
@@ -177,7 +177,7 @@ object Main:
       ),
       p(
         cls := "note",
-        "theorem: complete and certified; exact: complete under the structure theorems, every class certified; open: being enumerated."
+        "theorem: complete and certified; exact: complete under the structure theorems, every class certified."
       )
     )
 

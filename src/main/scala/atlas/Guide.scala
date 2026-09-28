@@ -59,7 +59,7 @@ object Guide:
           ),
           p(
             "In the plane Krötenheerdt found 11, 20, 39, 33, 15, 10, 7 tilings for k = 1 to 7 and none beyond. ",
-            "In space the sequence reads 28, 57, 119, 146, 122, 78, 18, 2 and is zero from k = 11 on, with k = 9 and 10 being enumerated — ",
+            "In space the sequence reads 28, 57, 119, 146, 122, 78, 18, 2 and is zero from k = 9 on, one row after the plane — ",
             to(Route.Sequence, "the sequence"),
             "."
           )
@@ -239,10 +239,9 @@ object Guide:
           ),
           p(
             "At k = 8 the exact enumeration of words finds two, both with cubes on cubes and hexagon rows of ",
-            "period 4, so the spatial sequence outlives the planar one. The enumerations of k = 9 and 10 are ",
-            "running; N",
+            "period 4, so the spatial sequence outlives the planar one by a row. At k = 9 and 10 it finds none. So N",
             sub("k"),
-            " = 0 from k = 11 on."
+            " = 0 from k = 9 on, and the two honeycombs of k = 8 are the last."
           )
         )
     ),
