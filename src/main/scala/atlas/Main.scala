@@ -363,7 +363,8 @@ object Main:
       c: ClassEntry,
       same: Seq[ClassEntry],
       link: ClassEntry => HtmlElement,
-      starIndex: String => Option[Int]
+      starIndex: String => Option[Int],
+      allLabels: Iterable[String]
   ): Seq[HtmlElement] =
     // each vertex star of the set links to its page
     val labels                    = c.pair.split("~").toSeq.map(_.trim).filter(_.nonEmpty)
@@ -377,7 +378,7 @@ object Main:
             labels.flatMap(l =>
               Seq(
                 starIndex(l).fold[Node](span(l))(n =>
-                  a(href := Route.fragment(Route.Star(n)), title := Species.describe(l), l)
+                  a(href := Route.fragment(Route.Star(n)), title := Species.describe(l, allLabels), l)
                 ),
                 span(" ~ ")
               )
@@ -425,7 +426,7 @@ object Main:
         cls  := "classpage",
         div(
           cls := "side",
-          div(cls := "card", dl(details(c, same, link, Stars.indexOf(i, _)))),
+          div(cls := "card", dl(details(c, same, link, Stars.indexOf(i, _), Stars.species(i).map(_._2)))),
           Lifts.onClassPage(c),
           Option(c.word).filter(_.nonEmpty).flatMap(ClassParts.wordStrip),
           ClassParts.foundCard(c)
@@ -433,7 +434,11 @@ object Main:
         child <-- patch.map {
           case None     => div(cls := "main-col", div(cls := "card", p(cls := "note", "loading the patch…")))
           case Some(pt) =>
-            div(cls := "main-col", Viewer(i.meta, pt), ClassParts.orbitsCard(pt, Stars.indexOf(i, _)))
+            div(
+              cls := "main-col",
+              Viewer(i.meta, pt),
+              ClassParts.orbitsCard(pt, Stars.indexOf(i, _), Stars.species(i).map(_._2))
+            )
         }
       )
     )

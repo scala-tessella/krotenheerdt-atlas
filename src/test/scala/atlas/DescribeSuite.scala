@@ -7,15 +7,24 @@ import Model.ClassEntry
 
 class DescribeSuite extends munit.FunSuite:
 
-  test("a species label reads in words, singular and plural, with its variant"):
-    assertEquals(Species.describe("{cube:4 p3:6}#1"), "4 cubes and 6 triangular prisms (variant 1)")
+  test("a species label reads in words, singular and plural, its variant named only among variants"):
+    val labels = Seq("{cube:4 p3:6}#1", "{cube:4 p3:6}#2", "{tet:1 truncTet:3 p3:2 p6:2}#1", "{P3:12}#1")
+    assertEquals(Species.describe("{cube:4 p3:6}#1", labels), "4 cubes and 6 triangular prisms (variant 1)")
+    assertEquals(Species.describe("{cube:4 p3:6}#2", labels), "4 cubes and 6 triangular prisms (variant 2)")
+    // one star with those cells: no variant to tell apart
     assertEquals(
-      Species.describe("{tet:1 truncTet:3 p3:2 p6:2}#1"),
-      "1 tetrahedron, 3 truncated tetrahedra, 2 triangular prisms and 2 hexagonal prisms (variant 1)"
+      Species.describe("{tet:1 truncTet:3 p3:2 p6:2}#1", labels),
+      "1 tetrahedron, 3 truncated tetrahedra, 2 triangular prisms and 2 hexagonal prisms"
     )
-    assertEquals(Species.describe("{tet:8 oct:6}"), "8 tetrahedra and 6 octahedra")
-    assertEquals(Species.describe("{P3:12}"), "12 triangular prisms")
-    assertEquals(Species.describe("not a label"), "not a label")
+    assertEquals(Species.describe("{P3:12}#1", labels), "12 triangular prisms")
+    assertEquals(
+      Species.describe("{p3:12}#2", labels),
+      "12 triangular prisms (variant 2)"
+    ) // case-blind cells
+    assertEquals(Species.describe("{tet:8 oct:6}", labels), "8 tetrahedra and 6 octahedra")
+    assertEquals(Species.describe("not a label", labels), "not a label")
+    assertEquals(Species.hasVariants("{cube:4 p3:6}#1", labels), true)
+    assertEquals(Species.hasVariants("{tet:1 truncTet:3 p3:2 p6:2}#1", labels), false)
     assertEquals(Species.cellCount("{cube:4 p3:6}#1"), Some(10))
 
   test("a stacking word reads layer by layer"):

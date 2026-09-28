@@ -63,7 +63,7 @@ object Stars:
             div(
               cls := "star-text",
               div(cls := "mono star-label", label),
-              div(Species.describe(label)),
+              div(Species.describe(label, species(i).map(_._2))),
               div(cls := "note", s"${cs.size} classes: ${usage(cs)}")
             )
           )
@@ -80,7 +80,7 @@ object Stars:
         h2(cls  := "class-title", span(cls := "mono id", label)),
         p(
           cls   := "summary",
-          s"${Species.describe(label).capitalize} around a vertex; used by ${cs.size} classes."
+          s"${Species.describe(label, species(i).map(_._2)).capitalize} around a vertex; used by ${cs.size} classes."
         ),
         div(
           cls   := "classpage",

@@ -25,7 +25,11 @@ object ClassParts:
     )
 
   /** The vertex orbits: one row each, hovered (or tapped) to show its vertices alone in the viewer. */
-  def orbitsCard(patch: ClassPatch, starIndex: String => Option[Int]): Option[HtmlElement] =
+  def orbitsCard(
+      patch: ClassPatch,
+      starIndex: String => Option[Int],
+      labels: Iterable[String]
+  ): Option[HtmlElement] =
     Option.when(patch.orbits.nonEmpty)(
       div(
         cls := "card orbits-card",
@@ -42,7 +46,7 @@ object ClassParts:
               tabIndex   := 0,
               role       := "button",
               aria.pressed <-- Viewer.highlight.signal.map(_.contains(i).toString),
-              aria.label := s"orbit ${i + 1}: ${Species.describe(label)}; show its vertices",
+              aria.label := s"orbit ${i + 1}: ${Species.describe(label, labels)}; show its vertices",
               onKeyDown.filter(e => e.key == "Enter" || e.key == " ") --> { e =>
                 e.preventDefault(); Viewer.highlight.update(h => if h.contains(i) then None else Some(i))
               },
@@ -56,7 +60,7 @@ object ClassParts:
               div(
                 cls := "orbit-text",
                 div(span(cls := "sw dot", backgroundColor := Palette.orbitCss(i)), s"orbit ${i + 1}"),
-                div(cls := "orbit-words", Species.describe(label)),
+                div(cls := "orbit-words", Species.describe(label, labels)),
                 div(cls := "mono orbit-label", label),
                 starIndex(label).map(n =>
                   a(

@@ -38,15 +38,27 @@ object Species:
     case Seq(a)    => a
     case init :+ z => init.mkString(", ") + " and " + z
 
-  /** A label in words: "4 cubes and 6 triangular prisms (variant 1)"; the label itself when it does not
-    * parse.
+  /** The cells of a label as a sorted multiset, the type in lower case: equal for two variants of one star.
     */
-  def describe(label: String): String = parse(label).fold(label) { (cells, variant) =>
-    val words = cells.map { (t, n) =>
-      names.get(t.toLowerCase).fold(s"$n $t")((one, many) => s"$n ${if n == 1 then one else many}")
+  private def cellsOf(label: String): Option[Seq[(String, Int)]] =
+    parse(label).map(_._1.map((t, n) => (t.toLowerCase, n)).sorted)
+
+  /** Whether `labels` holds another star with the same cells as `label`, so that its variant tells them
+    * apart.
+    */
+  def hasVariants(label: String, labels: Iterable[String]): Boolean =
+    cellsOf(label).exists(cells => labels.exists(o => o != label && cellsOf(o).contains(cells)))
+
+  /** A label in words: "4 cubes and 6 triangular prisms (variant 1)", the variant named only when `labels`
+    * (the atlas's stars) holds another star with the same cells; the label itself when it does not parse.
+    */
+  def describe(label: String, labels: Iterable[String]): String =
+    parse(label).fold(label) { (cells, variant) =>
+      val words = cells.map { (t, n) =>
+        names.get(t.toLowerCase).fold(s"$n $t")((one, many) => s"$n ${if n == 1 then one else many}")
+      }
+      andList(words) + variant.filter(_ => hasVariants(label, labels)).fold("")(v => s" (variant $v)")
     }
-    andList(words) + variant.fold("")(v => s" (variant $v)")
-  }
 
   /** The number of cells around the vertex. */
   def cellCount(label: String): Option[Int] = parse(label).map(_._1.map(_._2).sum)

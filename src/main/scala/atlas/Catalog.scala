@@ -139,7 +139,9 @@ object Catalog:
       val strong                           = ranked.filter(_._1 <= 2).map(p => Hit.ClassHit(p._2))
       val weak                             = ranked.filter(_._1 == 3).map(p => Hit.ClassHit(p._2))
       val byStar                           = species
-        .filter((_, l) => l.toLowerCase.contains(t) || Species.describe(l).toLowerCase.contains(t))
+        .filter((_, l) =>
+          l.toLowerCase.contains(t) || Species.describe(l, species.map(_._2)).toLowerCase.contains(t)
+        )
         .map((i, l) => Hit.StarHit(i, l))
       // the stars come after the ids and names and before the weaker matches (species set, word, key, tiling),
       // and first of all when the text looks like a label
