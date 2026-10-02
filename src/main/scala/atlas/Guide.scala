@@ -258,7 +258,7 @@ object Guide:
               "; for the first row, ",
               Papers.honeycombsArtifact,
               "): open programs whose tests derive each row again and fail if a single number differs. Anyone can ",
-              "run them; the shortest tier takes minutes, the longest enumeration about 32 hours."
+              "run them; the shortest tier takes minutes, the longest enumeration hours."
             )
           ),
           p("Several safeguards keep the machine half honest."),
