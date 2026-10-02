@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Puts the data bundle named in data.version into public/data/<version>/: from a local export when ATLAS_EXPORT
-# points at a directory holding <version>.tar.gz (the uniform-tilings repository's atlas/export/), otherwise from the
-# release asset atlas-data-<version> of scala-tessella/uniform-tilings. Checks every file against the manifest.
+# points at a directory holding <version>.tar.gz (the atlas export's output directory), otherwise from the release
+# atlas-data-<version> of this repository, scala-tessella/krotenheerdt-atlas. Checks every file against the manifest.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 version="$(tr -d '[:space:]' < data.version)"
@@ -11,7 +11,7 @@ tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 if [ -n "${ATLAS_EXPORT:-}" ] && [ -f "$ATLAS_EXPORT/$version.tar.gz" ]; then
   cp "$ATLAS_EXPORT/$version.tar.gz" "$tmp/"
 else
-  url="https://github.com/scala-tessella/uniform-tilings/releases/download/atlas-data-$version/$version.tar.gz"
+  url="https://github.com/scala-tessella/krotenheerdt-atlas/releases/download/atlas-data-$version/$version.tar.gz"
   curl -fsSL "$url" -o "$tmp/$version.tar.gz"
 fi
 tar -xzf "$tmp/$version.tar.gz" -C "$tmp"

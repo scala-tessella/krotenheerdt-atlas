@@ -6,11 +6,11 @@ Laminar, built with Vite, served as a static site at [atlas.tessell.art](https:/
 
 ## Data
 
-The application reads a data bundle produced by the atlas export of
-[uniform-tilings](https://github.com/scala-tessella/uniform-tilings) (`atlas/app/export.py`): an `index.json` and one
-`classes/<id>.json` per class, with a manifest of sizes and SHA-256 digests. The bundle is never committed here;
-`data.version` pins it, and `scripts/fetch-data.sh` places it in `public/data/<version>/`, from the release asset
-`atlas-data-<version>` of uniform-tilings, or from a local export when `ATLAS_EXPORT` points at its directory.
+The application reads a data bundle produced by the atlas export of uniform-tilings, the verification code of the
+papers: an `index.json` and one `classes/<id>.json` per class, with a manifest of sizes and SHA-256 digests. The
+bundle is never committed here; `data.version` pins it, and `scripts/fetch-data.sh` places it in
+`public/data/<version>/`, from the asset `<version>.tar.gz` of the release `atlas-data-<version>` of this repository,
+or from a local export when `ATLAS_EXPORT` points at its directory. Every file is checked against the manifest.
 
 ## Development
 

@@ -394,9 +394,7 @@ object Main:
       chambersOf(c).fold(Nil)(n => row("chambers", s"$n (minimal Delaney–Dress symbol)")),
       if c.key.isEmpty then Nil else row("key", span(cls := "mono", c.key)),
       if c.word.isEmpty then Nil else row("stacking word", span(cls := "mono", c.word)),
-      c.net.toOption.filter(_.nonEmpty).fold(Nil)(n =>
-        row("net", n, span(cls := "note", " (preliminary identification)"))
-      ),
+      netOf(c).fold(Nil)(n => row("net", n)),
       if same.isEmpty then Nil
       else row("same species set", same.flatMap(o => Seq(link(o), span(", "))).dropRight(1)*)
     ).flatten

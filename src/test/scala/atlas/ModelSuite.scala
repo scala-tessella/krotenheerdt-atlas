@@ -22,6 +22,13 @@ class ModelSuite extends munit.FunSuite:
     assertEquals((c.k, c.v.length, c.f.length, c.o.toSeq.distinct.sorted), (9, 6, 5, Seq(0, 1)))
     assertEqualsDouble(c.v(2)(1), 0.866, 1e-9)
 
+  test("a net is shown only where its identification is confirmed"):
+    def entry(json: String) = js.JSON.parse(json).asInstanceOf[ClassEntry]
+    assertEquals(netOf(entry("""{"id":"k2-057","net":"znz"}""")), Some("znz"))
+    assertEquals(netOf(entry("""{"id":"k2-041","net":"unmatched"}""")), None)
+    assertEquals(netOf(entry("""{"id":"k2-001","net":""}""")), None)
+    assertEquals(netOf(entry("""{"id":"k1-004"}""")), None)
+
   test("chambers are optional: null for the uniform honeycombs"):
     val known   = js.JSON.parse("""{"id":"k2-029","chambers":20}""").asInstanceOf[ClassEntry]
     val unknown = js.JSON.parse("""{"id":"k1-004","chambers":null}""").asInstanceOf[ClassEntry]
