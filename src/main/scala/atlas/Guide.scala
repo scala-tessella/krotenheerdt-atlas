@@ -225,6 +225,74 @@ object Guide:
         )
     ),
     Section(
+      "trust",
+      "Why the counts can be trusted",
+      () =>
+        Seq(
+          p(
+            "The counts are the theorems of two papers: ",
+            em(Papers.honeycombsTitle),
+            " (",
+            Papers.honeycombs,
+            ") for the first row, and ",
+            em(Papers.sequenceTitle),
+            " (",
+            Papers.sequence,
+            ") for the rows from k = 2 on and the vanishing. Both are preprints, each deposited with a ",
+            "verification artifact. The proof of a row has two halves."
+          ),
+          ul(
+            li(
+              strong("By hand"),
+              ": the structure theorems, which say what a Krötenheerdt honeycomb with five or more kinds of ",
+              "vertex must be and why no stacking word carries eleven species, are proved in the paper, to be read ",
+              "as any proof is. Their arithmetic and counting steps are also formalized in Lean 4 (",
+              Papers.sequenceLean,
+              "), so a proof assistant has checked them."
+            ),
+            li(
+              strong("By machine"),
+              ": every finite fact those proofs use, every count and every class is asserted by the verification ",
+              "artifact (",
+              Papers.sequenceArtifact,
+              "; for the first row, ",
+              Papers.honeycombsArtifact,
+              "): open programs whose tests derive each row again and fail if a single number differs. Anyone can ",
+              "run them; the shortest tier takes minutes, the longest enumeration about 32 hours."
+            )
+          ),
+          p("Several safeguards keep the machine half honest."),
+          ul(
+            li(
+              "Nothing is taken from a list. No published catalogue of honeycombs is an input, and even the planar ",
+              "sequence 11, 20, 39, 33, 15, 10, 7 is derived again rather than quoted."
+            ),
+            li(
+              "Two methods agree where they overlap: the ",
+              term("certificates", "census and the word enumeration"),
+              " are independent, and at k = 2, 3 and 4 the enumeration returns exactly the classes the census ",
+              "knows. From k = 5 on every class is checked on its own: a valid, minimal symbol with k distinct ",
+              "stars, and nothing else at its folding tuple."
+            ),
+            li(
+              "The certificates are outputs, never inputs: no test reads one back, so a stale or edited ",
+              "certificate cannot make anything pass."
+            ),
+            li(
+              "Nothing drifts: the artifacts are archived at fixed versions, and the library they share is pinned ",
+              "and archived too (",
+              Papers.researchCore,
+              ")."
+            )
+          ),
+          p(
+            "The atlas itself adds no claim: its data is exported from the same code, and each class page tells ",
+            "the record of its class. What is left to trust is what can be inspected: the hand proofs, in the ",
+            "papers, and the programs, in the open."
+          )
+        )
+    ),
+    Section(
       "vanishing",
       "Where the sequence stops",
       () =>

@@ -5,8 +5,7 @@ import com.raquo.laminar.api.L.*
 /** The about page: what the atlas is, the papers behind it, how to cite it, and how it is made. */
 object About:
 
-  private def ext(url: String, text: String): HtmlElement =
-    a(href := url, target := "_blank", rel := "noopener", text)
+  import Papers.ext
 
   def view(total: Int): HtmlElement =
     div(
@@ -29,20 +28,20 @@ object About:
           cls := "refs",
           li(
             "M. Càllisto, ",
-            em("The 28 convex uniform honeycombs: a completeness theorem"),
+            em(Papers.honeycombsTitle),
             ", preprint, Zenodo, 2026, ",
-            ext("https://doi.org/10.5281/zenodo.22881686", "doi:10.5281/zenodo.22881686"),
+            Papers.honeycombs,
             "; verification artifact, ",
-            ext("https://doi.org/10.5281/zenodo.22868141", "doi:10.5281/zenodo.22868141"),
+            Papers.honeycombsArtifact,
             ". The first row: the 28 are all there is."
           ),
           li(
             "M. Càllisto, ",
-            em("The three-dimensional Krötenheerdt sequence and its vanishing point"),
+            em(Papers.sequenceTitle),
             ", preprint, Zenodo, 2026, ",
-            ext("https://doi.org/10.5281/zenodo.23099603", "doi:10.5281/zenodo.23099603"),
+            Papers.sequence,
             "; verification artifact, ",
-            ext("https://doi.org/10.5281/zenodo.23096848", "doi:10.5281/zenodo.23096848"),
+            Papers.sequenceArtifact,
             ". The rows k = 2 to 8 and the vanishing of the sequence from k = 9 on."
           ),
           li(
@@ -50,6 +49,12 @@ object About:
             em("Wiss. Z. Martin-Luther-Univ. Halle-Wittenberg Math.-Natur. Reihe"),
             " 18 (1969) 273–290; 19 (1970) 19–38, 97–122. The planar sequence."
           )
+        ),
+        p(
+          cls := "note",
+          "How the papers and their artifacts establish the counts: ",
+          a(href := Route.fragment(Route.Guide(Some("trust"))), "why the counts can be trusted"),
+          "."
         )
       ),
       div(

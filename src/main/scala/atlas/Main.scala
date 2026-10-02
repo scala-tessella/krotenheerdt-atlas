@@ -178,6 +178,21 @@ object Main:
       p(
         cls := "note",
         "theorem: complete and certified; exact: complete under the structure theorems, every class certified."
+      ),
+      p(
+        cls := "prose",
+        "The first row is the theorem of ",
+        em(Papers.honeycombsTitle),
+        " (",
+        Papers.honeycombs,
+        "); the rows from k = 2 on and the vanishing are the theorems of ",
+        em(Papers.sequenceTitle),
+        " (",
+        Papers.sequence,
+        "). The structure theorems are proved in the papers; every count and every class is re-derived by a ",
+        "public verification artifact that anyone can run. The guide tells ",
+        a(href := Route.fragment(Route.Guide(Some("trust"))), "why the counts can be trusted"),
+        "."
       )
     )
 

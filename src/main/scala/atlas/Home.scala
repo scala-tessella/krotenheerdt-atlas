@@ -143,7 +143,7 @@ object Home:
         entry(
           Route.Guide(None),
           "Guide",
-          "What the atlas counts and how to read it: orbits, stars, words, symbols, certificates."
+          "What the atlas counts, how to read it, and why the counts can be trusted: orbits, stars, words, symbols, certificates."
         )
       ),
       h2(cls := "section-title", "A first look"),
