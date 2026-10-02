@@ -1,0 +1,27 @@
+# The atlas of the Krötenheerdt honeycombs
+
+> An atlas of the 570 k-uniform Krötenheerdt honeycombs of Euclidean 3-space: the face-to-face honeycombs by unit-edge convex uniform polyhedra whose vertices fall into exactly k orbits carrying k pairwise distinct vertex stars. Every class is drawn in 3D from its certified realization and identified by its minimal Delaney–Dress symbol.
+
+The number N_k of such honeycombs is 28, 57, 119, 146, 122, 78, 18, 2 for k = 1 to 8, and 0 from k = 9 on. The planar Krötenheerdt sequence, 11, 20, 39, 33, 15, 10, 7 and then 0, sits inside it: every planar tiling appears as its prismatic lift. The three-dimensional sequence vanishes one row after the planar one.
+
+The site is a single-page application; its pages are addressed by fragment.
+
+## Pages
+
+- [Home](https://atlas.tessell.art/): what the atlas shows
+- [The sequence](https://atlas.tessell.art/#sequence): N_k row by row, with how each count is known
+- [The classes](https://atlas.tessell.art/#classes): all 570 honeycombs, filtered by k, world and source
+- [Prismatic lifts](https://atlas.tessell.art/#lifts): the 135 planar Krötenheerdt tilings lifted into space
+- [Vertex stars](https://atlas.tessell.art/#stars): the arrangements of cells around a vertex
+- [Guide](https://atlas.tessell.art/#guide): the notions of the atlas, how the counts are certified and why they can be trusted
+- [About](https://atlas.tessell.art/#about): the papers and how to cite
+
+## Papers
+
+- M. Càllisto, The 28 convex uniform honeycombs: a completeness theorem, preprint, Zenodo, 2026: https://doi.org/10.5281/zenodo.22881686 (verification artifact: https://doi.org/10.5281/zenodo.22868141)
+- M. Càllisto, The three-dimensional Krötenheerdt sequence and its vanishing point, preprint, Zenodo, 2026: https://doi.org/10.5281/zenodo.23099603 (verification artifact: https://doi.org/10.5281/zenodo.23096848)
+
+## Data and source
+
+- Source of the application: https://github.com/scala-tessella/krotenheerdt-atlas
+- Data bundles (index.json, one JSON file per class, manifest with SHA-256 digests): https://github.com/scala-tessella/krotenheerdt-atlas/releases
