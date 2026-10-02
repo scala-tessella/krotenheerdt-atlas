@@ -22,10 +22,9 @@ class ModelSuite extends munit.FunSuite:
     assertEquals((c.k, c.v.length, c.f.length, c.o.toSeq.distinct.sorted), (9, 6, 5, Seq(0, 1)))
     assertEqualsDouble(c.v(2)(1), 0.866, 1e-9)
 
-  test("a net is shown only where its identification is confirmed"):
+  test("a net is optional: empty or absent where none is identified"):
     def entry(json: String) = js.JSON.parse(json).asInstanceOf[ClassEntry]
     assertEquals(netOf(entry("""{"id":"k2-057","net":"znz"}""")), Some("znz"))
-    assertEquals(netOf(entry("""{"id":"k2-041","net":"unmatched"}""")), None)
     assertEquals(netOf(entry("""{"id":"k2-001","net":""}""")), None)
     assertEquals(netOf(entry("""{"id":"k1-004"}""")), None)
 

@@ -55,9 +55,7 @@ object Model:
     val key: String          = js.native
     val word: String         = js.native
 
-    /** The net's name as the bundle carries it: a preliminary identification, or the word for none found;
-      * empty or absent otherwise. Shown only through `netOf`.
-      */
+    /** The RCSR symbol of the class's net where Systre identifies it, else empty or absent. */
     val net: js.UndefOr[String] = js.native
 
     /** The checks of a class found by the stacking enumeration, absent for the others. */
@@ -118,11 +116,8 @@ object Model:
   /** The planar tiling of a lift, when identified. */
   def tilingOf(c: ClassEntry): Option[String] = c.tiling.toOption.filter(_.nonEmpty)
 
-  /** The net names whose identification is confirmed; the bundle's other names are preliminary. */
-  val confirmedNets: Set[String] = Set("znz")
-
-  /** The net of a class where its identification is confirmed: the preliminary names are withheld. */
-  def netOf(c: ClassEntry): Option[String] = c.net.toOption.filter(confirmedNets)
+  /** The RCSR symbol of a class's net, if it is identified. */
+  def netOf(c: ClassEntry): Option[String] = c.net.toOption.filter(_.nonEmpty)
 
   /** The chambers of a class, if known. */
   def chambersOf(c: ClassEntry): Option[Int] = Option(c.chambers).map(_.asInstanceOf[Int])

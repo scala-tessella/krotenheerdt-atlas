@@ -409,7 +409,7 @@ object Main:
       chambersOf(c).fold(Nil)(n => row("chambers", s"$n (minimal Delaney–Dress symbol)")),
       if c.key.isEmpty then Nil else row("key", span(cls := "mono", c.key)),
       if c.word.isEmpty then Nil else row("stacking word", span(cls := "mono", c.word)),
-      netOf(c).fold(Nil)(n => row("net", n)),
+      netOf(c).fold(Nil)(n => row("RCSR net", Papers.ext(s"http://rcsr.net/nets/$n", n))),
       if same.isEmpty then Nil
       else row("same species set", same.flatMap(o => Seq(link(o), span(", "))).dropRight(1)*)
     ).flatten
