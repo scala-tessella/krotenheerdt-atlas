@@ -26,6 +26,11 @@ The bundles are also deposited on Zenodo, licence CC BY 4.0: every version under
 `npm run build` writes the static site to `dist/`. The GitHub workflow, started by hand from the Actions tab,
 tests, builds and deploys `dist/` to Cloudflare Pages when run on `main`.
 
+## Maintenance
+
+[RUNBOOK.md](RUNBOOK.md) tells how a change reaches the site, how a new data bundle is published and archived, and
+what to check after a deployment.
+
 ## License
 
 Apache License 2.0.
