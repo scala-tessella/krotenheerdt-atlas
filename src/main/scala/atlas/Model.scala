@@ -2,8 +2,8 @@ package atlas
 
 import scala.scalajs.js
 
-/** Typed views of the data bundle's JSON (written by the atlas export of the uniform-tilings repository): the
-  * parsed objects are read in place, never copied, since a class carries up to some two thousand cells.
+/** Typed views of the data bundle's JSON (written by the atlas export of the verification code): the parsed
+  * objects are read in place, never copied, since a class carries up to some two thousand cells.
   */
 object Model:
 
