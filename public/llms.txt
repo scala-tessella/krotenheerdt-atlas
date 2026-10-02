@@ -24,4 +24,4 @@ The site is a single-page application; its pages are addressed by fragment.
 ## Data and source
 
 - Source of the application: https://github.com/scala-tessella/krotenheerdt-atlas
-- Data bundles (index.json, one JSON file per class, manifest with SHA-256 digests): https://github.com/scala-tessella/krotenheerdt-atlas/releases
+- Data bundles (index.json, one JSON file per class, manifest with SHA-256 digests), licence CC BY 4.0: https://doi.org/10.5281/zenodo.23105749 (Zenodo, all versions) and https://github.com/scala-tessella/krotenheerdt-atlas/releases

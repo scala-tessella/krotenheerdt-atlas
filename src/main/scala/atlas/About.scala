@@ -64,9 +64,17 @@ object About:
           cls := "cite mono",
           s"M. Càllisto, The atlas of the Krötenheerdt honeycombs, data version ${DataVersion.value}, 2026, https://atlas.tessell.art"
         ),
+        Papers.dataDois.get(DataVersion.value).map(id =>
+          p(
+            cls := "cite mono",
+            s"M. Càllisto, The atlas of the Krötenheerdt honeycombs: data bundle, version ${DataVersion.value}, Zenodo, 2026, ",
+            Papers.doi(id)
+          )
+        ),
         p(
           cls := "note",
-          "The data version names the state of the atlas a page shows; it is also in the footer of every page."
+          "The first form cites the atlas, the second its data. The data version names the state of the atlas a ",
+          "page shows; it is also in the footer of every page."
         )
       ),
       div(
@@ -82,7 +90,9 @@ object About:
         p(
           "Source: ",
           ext("https://github.com/scala-tessella/krotenheerdt-atlas", "scala-tessella/krotenheerdt-atlas"),
-          ". Licence: Apache 2.0. A sibling of ",
+          ". Licence: Apache 2.0. The data bundle is deposited on Zenodo, every version under ",
+          Papers.doi(Papers.dataConceptDoi),
+          ", licence CC BY 4.0. A sibling of ",
           ext("https://www.tessell.art", "tessell.art"),
           ", the editor of planar tessellations."
         )

@@ -12,6 +12,10 @@ The application reads a data bundle exported from the verification code of the p
 `<version>.tar.gz` of the release `atlas-data-<version>` of this repository, or from a local export when
 `ATLAS_EXPORT` points at its directory. Every file is checked against the manifest.
 
+The bundles are also deposited on Zenodo, licence CC BY 4.0: every version under
+[10.5281/zenodo.23105749](https://doi.org/10.5281/zenodo.23105749), the bundle `a95f339` as
+[10.5281/zenodo.23105750](https://doi.org/10.5281/zenodo.23105750).
+
 ## Development
 
     scripts/fetch-data.sh        # once per data version

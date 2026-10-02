@@ -8,7 +8,13 @@ object Papers:
   def ext(url: String, text: String): HtmlElement =
     a(href := url, target := "_blank", rel := "noopener", text)
 
-  private def doi(id: String): HtmlElement = ext(s"https://doi.org/$id", s"doi:$id")
+  /** The deposited data bundles, by data version: the version DOI of each. */
+  val dataDois: Map[String, String] = Map("a95f339" -> "10.5281/zenodo.23105750")
+
+  /** The record of every version of the data bundle (the concept DOI). */
+  val dataConceptDoi = "10.5281/zenodo.23105749"
+
+  def doi(id: String): HtmlElement = ext(s"https://doi.org/$id", s"doi:$id")
 
   val honeycombsTitle = "The 28 convex uniform honeycombs: a completeness theorem"
   val sequenceTitle   = "The three-dimensional Krötenheerdt sequence and its vanishing point"
