@@ -11,6 +11,7 @@ reaches the site, how a new data bundle is published, and what to check afterwar
 | The data bundle | never committed; `data.version` names it, the release `atlas-data-<version>` of this repository holds `<version>.tar.gz` |
 | The archived data | Zenodo, every version under [10.5281/zenodo.23105749](https://doi.org/10.5281/zenodo.23105749), licence CC BY 4.0 |
 | The site | Cloudflare Pages, project `krotenheerdt-atlas` (direct upload), production branch `main`, custom domain `atlas.tessell.art` |
+| The Search Console verification | `public/google81a65dc53fdc8a11.html`, served at the root of the site; the property stays verified only while the file is there |
 | The deployment | the workflow `deploy` (`.github/workflows/deploy.yml`), started by hand |
 | The secrets | repository secrets `CLOUDFLARE_API_TOKEN` (permission Cloudflare Pages: Edit) and `CLOUDFLARE_ACCOUNT_ID` |
 | The export | the verification code of the papers, a separate repository; it writes `atlas/export/<version>/` and `<version>.tar.gz` |
