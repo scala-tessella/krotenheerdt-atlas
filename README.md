@@ -14,7 +14,8 @@ The application reads a data bundle exported from the verification code of the p
 
 The bundles are also deposited on Zenodo, licence CC BY 4.0: every version under
 [10.5281/zenodo.23105749](https://doi.org/10.5281/zenodo.23105749), the bundle `a95f339` as
-[10.5281/zenodo.23105750](https://doi.org/10.5281/zenodo.23105750).
+[10.5281/zenodo.23105750](https://doi.org/10.5281/zenodo.23105750), the bundle `36afe01` as
+[10.5281/zenodo.23119258](https://doi.org/10.5281/zenodo.23119258).
 
 ## Development
 

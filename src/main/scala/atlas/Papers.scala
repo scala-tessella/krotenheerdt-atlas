@@ -9,7 +9,8 @@ object Papers:
     a(href := url, target := "_blank", rel := "noopener", text)
 
   /** The deposited data bundles, by data version: the version DOI of each. */
-  val dataDois: Map[String, String] = Map("a95f339" -> "10.5281/zenodo.23105750")
+  val dataDois: Map[String, String] =
+    Map("a95f339" -> "10.5281/zenodo.23105750", "36afe01" -> "10.5281/zenodo.23119258")
 
   /** The record of every version of the data bundle (the concept DOI). */
   val dataConceptDoi = "10.5281/zenodo.23105749"
