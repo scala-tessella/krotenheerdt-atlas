@@ -75,14 +75,14 @@ object Home:
     )
 
   private def entry(r: Route, title: String, text: String): HtmlElement =
-    a(cls := "entry card", href := Route.fragment(r), h3(title), p(text))
+    a(cls := "entry card", href := Route.path(r), h3(title), p(text))
 
   /** A featured class: why it is worth a look. */
   private def featured(i: AtlasIndex, id: String, why: String): Option[HtmlElement] =
     i.classes.find(_.id == id).map(c =>
       a(
         cls  := "featured card",
-        href := Route.fragment(Route.Class(c.id, orbits = false)),
+        href := Route.path(Route.Class(c.id, orbits = false)),
         div(span(cls := "mono id", c.id), " ", span(cls := s"tag ${c.cat}", c.cat)),
         h3(c.name),
         p(why)
@@ -115,7 +115,7 @@ object Home:
           ", the honeycombs of space with k kinds of vertex  ",
           span(cls := "sw plane"),
           "the planar tilings with k kinds of vertex, all of them among the honeycombs as ",
-          a(href   := Route.fragment(Route.Lifts(None)), "prismatic lifts")
+          a(href   := Route.path(Route.Lifts(None)), "prismatic lifts")
         )
       ),
       div(

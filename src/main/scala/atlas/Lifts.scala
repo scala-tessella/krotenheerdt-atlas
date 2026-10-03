@@ -76,14 +76,14 @@ object Lifts:
           a(
             cls       := "chip",
             cls("on") := only.isEmpty,
-            href      := Route.fragment(Route.Lifts(None)),
+            href      := Route.path(Route.Lifts(None)),
             s"all ${lifts.size}"
           ),
           byK.map((k, cs) =>
             a(
               cls       := "chip",
               cls("on") := only.contains(k),
-              href      := Route.fragment(Route.Lifts(Some(k))),
+              href      := Route.path(Route.Lifts(Some(k))),
               s"k = $k · ${cs.size}"
             )
           )
@@ -98,7 +98,7 @@ object Lifts:
             cs.map(c =>
               a(
                 cls  := "tile",
-                href := Route.fragment(Route.Class(c.id, orbits = false)),
+                href := Route.path(Route.Class(c.id, orbits = false)),
                 child <-- tilings.map(ts =>
                   ts.flatMap(_.get(c.id)) match
                     case Some(t) => drawing(t, Some(8), tilingOf(c).getOrElse(c.name))
@@ -135,7 +135,7 @@ object Lifts:
           cls := "note",
           span(cls := "mono", types),
           s" — this honeycomb is its prismatic lift. ",
-          a(href   := Route.fragment(Route.Lifts(Some(c.k))), s"All planar tilings with k = ${c.k}")
+          a(href   := Route.path(Route.Lifts(Some(c.k))), s"All planar tilings with k = ${c.k}")
         )
       )
     }

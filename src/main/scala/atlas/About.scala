@@ -53,7 +53,7 @@ object About:
         p(
           cls := "note",
           "How the papers and their artifacts establish the counts: ",
-          a(href := Route.fragment(Route.Guide(Some("trust"))), "why the counts can be trusted"),
+          a(href := Route.path(Route.Guide(Some("trust"))), "why the counts can be trusted"),
           "."
         )
       ),

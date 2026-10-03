@@ -58,7 +58,7 @@ object Stars:
           val cs  = users(i, n)
           a(
             cls  := "star-card",
-            href := Route.fragment(Route.Star(n)),
+            href := Route.path(Route.Star(n)),
             child <-- stars.map(_.flatMap(_.get(n.toString)).fold[Node](div(cls := "star"))(thumbnail)),
             div(
               cls := "star-text",
@@ -76,7 +76,7 @@ object Stars:
       val cs    = users(i, n)
       val stars = Signal.fromFuture(Data.stars)
       div(
-        div(cls := "nav-bar", a(href := Route.fragment(Route.Stars), "← all vertex stars")),
+        div(cls := "nav-bar", a(href := Route.path(Route.Stars), "← all vertex stars")),
         h2(cls  := "class-title", span(cls := "mono id", label)),
         p(
           cls   := "summary",
@@ -96,7 +96,7 @@ object Stars:
                   div(
                     cls := "links",
                     g.map(c =>
-                      a(href := Route.fragment(Route.Class(c.id, orbits = false)), title := c.name, c.id)
+                      a(href := Route.path(Route.Class(c.id, orbits = false)), title := c.name, c.id)
                     )
                   )
                 )
@@ -115,7 +115,7 @@ object Stars:
                 p(
                   cls := "note",
                   s"Cut from ",
-                  a(href := Route.fragment(Route.Class(star.source, orbits = false)), star.source),
+                  a(href := Route.path(Route.Class(star.source, orbits = false)), star.source),
                   "."
                 )
               ))

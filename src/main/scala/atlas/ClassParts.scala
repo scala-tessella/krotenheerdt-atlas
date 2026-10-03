@@ -65,7 +65,7 @@ object ClassParts:
                 starIndex(label).map(n =>
                   a(
                     cls  := "orbit-link",
-                    href := Route.fragment(Route.Star(n)),
+                    href := Route.path(Route.Star(n)),
                     onClick.stopPropagation --> { _ => () },
                     "every class with this star"
                   )

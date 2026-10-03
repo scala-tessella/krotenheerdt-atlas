@@ -22,16 +22,34 @@ Nothing deploys on push. A change is live only after the workflow has run on `ma
     scripts/fetch-data.sh        # once per data version; ATLAS_EXPORT=<export directory> takes a local tarball
     npm install
     npm run dev                  # the development server
-    sbt scalafmtCheckAll test    # the format check and the tests
-    npm run build                # the static site, in dist/
+    sbt scalafmtCheckAll pages/scalafmtCheckAll test    # the format check and the tests
+    npm run build                # the static site, in dist/: the application, then its pages (see below)
     npx vite preview             # serves dist/ as the site will be served
 
 `public/data/` keeps every bundle ever fetched, and a local build copies them all into `dist/`. The workflow fetches
 only the pinned one. Old directories under `public/data/` can be deleted at any time.
 
+## The pages
+
+Every place of the application has its own address (`/sequence`, `/class/k8-001`, `/star/16`, `/guide#trust`;
+`Route.scala`), and `npm run build` writes one HTML file for each: after `vite build`, the Node program of the sbt
+project `pages` (`pages/src/main/scala/atlas/pages/Pages.scala`) takes `dist/index.html` as the template and writes
+`index.html`, `sequence.html`, `class/<id>.html` and so on, `404.html` for every other address, and `sitemap.xml`.
+Each file carries the head of its page (title, description, canonical address, Open Graph, structured data;
+`PageHead.scala`) and the page as the application draws it before its data is fetched: the program runs the
+application's own views in a DOM of jsdom, so there is no second copy of the texts. The host serves
+`class/k8-001.html` at `/class/k8-001`. In the browser that text stands until the index is fetched; then the
+application takes its place.
+
+A new kind of page needs its route in `Route.scala`, its head in `PageHead.of` and its place in `PageHead.pages`:
+a page missing from that list is not written, and its address answers 404 when opened directly.
+
+The earlier addresses kept the place in the fragment (`/#class/k8-001`). They still work: the application replaces
+them with the new address when it starts (`Route.legacy`). They must keep working, since they are in print.
+
 ## Deploying a change to the application
 
-1. `sbt scalafmtCheckAll test` and `npm run build` pass.
+1. `sbt scalafmtCheckAll pages/scalafmtCheckAll test` and `npm run build` pass.
 2. Commit and push `main`.
 3. Actions > deploy > Run workflow, on `main`. It tests, fetches the data bundle, builds and deploys.
 4. Check the site (see [After a deployment](#after-a-deployment)).
@@ -74,7 +92,8 @@ On Zenodo:
 The application reads the classes and the sequence from the bundle, but these places state them in fixed text and
 need a manual update when the number of classes, the sequence or the papers change:
 
-- `index.html`: the description, the Open Graph and Twitter descriptions, the structured data, the `<noscript>` text
+- `index.html`: the description, the Open Graph and Twitter descriptions, the structured data (the head of the home
+  page; the heads of the other pages are computed from the bundle)
 - `public/llms.txt`
 - `public/social-card.jpg` (see [The social card](#the-social-card))
 - the home page's tiles (`Home.scala`: the counts of prismatic lifts and of vertex stars) and the texts of the guide
@@ -101,7 +120,7 @@ the archive changes, update the note in `nets.py`.
 ## When a paper or an artifact gets a new DOI
 
 Every DOI of the application is in `src/main/scala/atlas/Papers.scala`. The same DOIs are repeated in `index.html`
-(structured data and `<noscript>`) and in `public/llms.txt`. Cite version DOIs for papers and artifacts; the concept
+(structured data) and in `public/llms.txt`. Cite version DOIs for papers and artifacts; the concept
 DOI is used only for the data record, where "every version" is meant.
 
 ## The social card
@@ -118,6 +137,9 @@ Messaging applications cache the preview of a URL. To see a new card at once, sh
 ## After a deployment
 
     curl -s https://atlas.tessell.art/ | grep -o '<title>[^<]*'
+    curl -s https://atlas.tessell.art/class/k8-001 | grep -o '<title>[^<]*'
+    curl -s -o /dev/null -w "%{http_code}\n" https://atlas.tessell.art/nowhere      # 404
+    curl -s https://atlas.tessell.art/sitemap.xml | grep -c '<url>'                  # one per page
     curl -s https://atlas.tessell.art/data/$(cat data.version)/manifest.json | head -c 80
     for p in robots.txt sitemap.xml llms.txt favicon.svg social-card.jpg; do
       curl -s -o /dev/null -w "$p %{http_code} %{content_type}\n" https://atlas.tessell.art/$p; done
@@ -125,14 +147,18 @@ Messaging applications cache the preview of a URL. To see a new card at once, sh
 - The footer of the site shows the data version of `data.version`.
 - The about page shows the citations, and the data's DOI for the current version.
 - A class page opens and draws its patch; a class of k = 2 with a net shows the row "RCSR net".
-- Every static file answers with its own content type. A missing file answers `200 text/html`, the page of the
-  application, never 404: check the content type, not the status.
+- An address of the earlier kind (`https://atlas.tessell.art/#class/k8-001`) opens the class, at its new address.
+- Every static file answers with its own content type. A missing file answers 404 with `404.html`, the application
+  saying "no such page".
 
 ## Known limits
 
-- The pages are addressed by fragment (`#class/k8-001`), so search engines see one page and every shared link shows
-  the same card. Indexable pages per class would need path routes and pages rendered at build time.
-- `sitemap.xml` lists the one address for the same reason.
+- Every shared link shows the same image: the pages have their own title and description, but one social card.
+- The pages written at build time hold what the application shows before fetching: no patch, no drawing of a
+  tiling or of a vertex star. The page of the classes lists every class; in the browser the table shows them by
+  pages.
+- A filtered table (`/classes?k=5`) and a class with its orbits on (`/class/k8-001?orbits`) are states of one page:
+  their canonical address is the page's.
 - The links to RCSR are `http://`: the RCSR site did not answer over HTTPS when they were written.
 
 ## Troubleshooting
@@ -144,7 +170,9 @@ Messaging applications cache the preview of a URL. To see a new card at once, sh
 | The workflow fails at "Deploy" | A secret is missing or the token lacks Cloudflare Pages: Edit; the Pages project must exist under the name `krotenheerdt-atlas` |
 | The site shows the old version after a deployment | The workflow did not run, or ran on a commit before the push: check the commit of the latest run in the Actions tab |
 | The domain does not resolve just after a DNS change | A cached negative answer on the local resolver; it clears by itself, another network shows the site at once |
-| The first load of a page shows "loading the atlas…" | The index is being fetched; the data is cached for a year under its versioned address |
+| A page stays as it was written, without the viewer or the live table | The index is being fetched, or its fetch failed: check `/data/<version>/index.json`; the data is cached for a year under its versioned address |
+| `npm run build` fails with "is not the template Vite builds" | The pages were written without a fresh `vite build`, or the element `#app` of `index.html` was changed without changing `Pages.container` |
+| An address opens from a link inside the site but answers 404 when opened directly | Its page is not in `PageHead.pages`, so no file was written for it |
 
 ## Conventions
 

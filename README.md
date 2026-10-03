@@ -1,7 +1,7 @@
 # The atlas of the Krötenheerdt honeycombs
 
 A web application for the k-uniform Krötenheerdt honeycombs of Euclidean 3-space: the sequence N_k, the table of
-every class for k = 1 to 8, and a page per class with its solid cells and vertex orbits. Scala 3 with Scala.js and
+every class for k = 1 to 8, and a page per class, at its own address, with its solid cells and vertex orbits. Scala 3 with Scala.js and
 Laminar, built with Vite, served as a static site at [atlas.tessell.art](https://atlas.tessell.art).
 
 ## Data
@@ -23,7 +23,9 @@ The bundles are also deposited on Zenodo, licence CC BY 4.0: every version under
     npm run dev                  # Vite development server; the Scala.js code is linked by sbt on demand
     sbt test                     # the Scala.js tests, on Node
 
-`npm run build` writes the static site to `dist/`. The GitHub workflow, started by hand from the Actions tab,
+`npm run build` writes the static site to `dist/`: Vite builds the application, then the sbt project `pages` writes
+one HTML file per page of the atlas (every class, every vertex star, the guide, …), each with its own head and the
+text the application shows, and the site map. The GitHub workflow, started by hand from the Actions tab,
 tests, builds and deploys `dist/` to Cloudflare Pages when run on `main`.
 
 ## Maintenance

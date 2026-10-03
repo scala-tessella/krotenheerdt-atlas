@@ -39,3 +39,17 @@ lazy val atlas = project
       Seq(out)
     }.taskValue
   )
+
+// the pages written at build time: a Node program that draws every page of the application in a DOM of its own
+// (jsdom) and writes it into dist/, after Vite has built the site (npm run build)
+lazy val pages = project
+  .in(file("pages"))
+  .enablePlugins(ScalaJSPlugin)
+  .dependsOn(atlas)
+  .settings(
+    scalacOptions ++= Seq("-deprecation", "-feature", "-Werror"),
+    scalafmtOnCompile                                 := true,
+    scalaJSUseMainModuleInitializer                   := true,
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) },
+    Compile / fastLinkJS / scalaJSLinkerOutputDirectory := (ThisBuild / baseDirectory).value / "target" / "pages"
+  )

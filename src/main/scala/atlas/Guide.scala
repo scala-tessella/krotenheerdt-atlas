@@ -4,13 +4,13 @@ import com.raquo.laminar.api.L.*
 import org.scalajs.dom
 
 /** The guide: the notions the atlas is written in, one section each, linked from wherever a term appears
-  * (`#guide/<section>`). The texts follow the definitions and theorems of the papers, in plain words.
+  * (`/guide#<section>`). The texts follow the definitions and theorems of the papers, in plain words.
   */
 object Guide:
 
   final case class Section(id: String, title: String, body: () => Seq[Modifier[HtmlElement]])
 
-  private def to(r: Route, text: String): HtmlElement     = a(href := Route.fragment(r), text)
+  private def to(r: Route, text: String): HtmlElement     = a(href := Route.path(r), text)
   private def term(id: String, text: String): HtmlElement = to(Route.Guide(Some(id)), text)
   private def m(text: String): HtmlElement                = span(cls := "mono", text)
 
@@ -338,16 +338,16 @@ object Guide:
     )
   )
 
+  /** Scrolls to a section, once the page is laid out. */
+  def scrollTo(section: String): Unit =
+    dom.window.requestAnimationFrame(_ =>
+      Option(dom.document.getElementById(section)).foreach(_.scrollIntoView(true))
+    )
+
   def view(section: Option[String]): HtmlElement =
     div(
       cls := "guide",
-      onMountCallback { _ =>
-        section.foreach(s =>
-          dom.window.requestAnimationFrame(_ =>
-            Option(dom.document.getElementById(s"guide-$s")).foreach(_.scrollIntoView(true))
-          )
-        )
-      },
+      onMountCallback(_ => section.foreach(scrollTo)),
       div(
         cls := "card intro",
         h2("Guide"),
@@ -355,12 +355,12 @@ object Guide:
           cls  := "prose",
           "The notions the atlas is written in, one at a time. Every technical term of the atlas links here."
         ),
-        ol(cls := "toc", sections.map(s => li(a(href := Route.fragment(Route.Guide(Some(s.id))), s.title))))
+        ol(cls := "toc", sections.map(s => li(a(href := Route.path(Route.Guide(Some(s.id))), s.title))))
       ),
       sections.map(s =>
         sectionTag(
           cls    := "card guide-section",
-          idAttr := s"guide-${s.id}",
+          idAttr := s.id,
           h2(s.title),
           div(cls := "prose", s.body())
         )
